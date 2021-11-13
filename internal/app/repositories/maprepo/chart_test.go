@@ -81,6 +81,29 @@ func TestDeleteChart(t *testing.T) {
 	assert.ErrorAs(t, err, &notFound)
 }
 
+func TestUpdateChart(t *testing.T) {
+	chartRepo, down := SetUpChart()
+
+	defer down()
+
+	chart := assets.Chart{
+		ID:    123,
+		Title: "test chart",
+	}
+
+	err := chartRepo.AddChart(context.Background(), chart)
+	assert.NoError(t, err)
+
+	chart.Title = "updated title"
+
+	err = chartRepo.Update(context.Background(), chart)
+	assert.NoError(t, err)
+
+	expected, err := chartRepo.Get(context.Background(), chart.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, expected.Title, chart.Title)
+}
+
 func TestStarChartForUser(t *testing.T) {
 	chartRepo, down := SetUpChart()
 

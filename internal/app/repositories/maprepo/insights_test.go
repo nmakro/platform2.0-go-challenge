@@ -81,6 +81,28 @@ func TestDeleteInsight(t *testing.T) {
 	assert.ErrorAs(t, err, &notFound)
 }
 
+func TestUpdateInsight(t *testing.T) {
+	insightRepo, down := SetUpInsight()
+
+	defer down()
+
+	ins := assets.Insight{
+		ID:    123,
+		Topic: "sales",
+	}
+	err := insightRepo.AddInsight(context.Background(), ins)
+	assert.NoError(t, err)
+
+	ins.Topic = "new topic"
+
+	err = insightRepo.Update(context.Background(), ins)
+	assert.NoError(t, err)
+
+	expected, err := insightRepo.Get(context.Background(), ins.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, expected.Topic, ins.Topic)
+}
+
 func TestStarInsightForUser(t *testing.T) {
 	insightRepo, down := SetUpInsight()
 

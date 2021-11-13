@@ -55,6 +55,17 @@ func (a *ChartRepo) Delete(ctx context.Context, chartID uint32) error {
 	return nil
 }
 
+func (a *ChartRepo) Update(ctx context.Context, chart assets.Chart) error {
+	c, err := a.Get(ctx, chart.ID)
+	if err != nil {
+		return err
+	}
+
+	key := fmt.Sprintf("%d", c.ID)
+	a.chartConn.Upsert(key, chart)
+	return nil
+}
+
 func (c *ChartRepo) Star(ctx context.Context, userEmail string, chartID uint32) error {
 	if chartID == 0 || userEmail == "" {
 		return fmt.Errorf("chart id and user email cannot be empty")

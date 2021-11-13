@@ -85,6 +85,30 @@ func TestDeleteAudience(t *testing.T) {
 	assert.ErrorAs(t, err, &notFound)
 }
 
+func TestUpdateAudience(t *testing.T) {
+	audienceRepo, down := SetUpAudience()
+
+	defer down()
+
+	aud := assets.Audience{
+		ID:               142,
+		SocialMediaHours: 168,
+		Gender:           assets.Male,
+	}
+
+	err := audienceRepo.AddAudience(context.Background(), aud)
+	assert.NoError(t, err)
+
+	aud.Gender = assets.Female
+
+	err = audienceRepo.Update(context.Background(), aud)
+	assert.NoError(t, err)
+
+	expected, err := audienceRepo.Get(context.Background(), aud.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, expected.Gender, assets.Female)
+}
+
 func TestStarAudienceForUser(t *testing.T) {
 	audienceRepo, down := SetUpAudience()
 

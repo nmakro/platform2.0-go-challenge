@@ -55,6 +55,17 @@ func (a *AudienceRepo) Delete(ctx context.Context, audienceID uint32) error {
 	return nil
 }
 
+func (a *AudienceRepo) Update(ctx context.Context, audience assets.Audience) error {
+	aud, err := a.Get(ctx, audience.ID)
+	if err != nil {
+		return err
+	}
+
+	key := fmt.Sprintf("%d", aud.ID)
+	a.audConn.Upsert(key, audience)
+	return nil
+}
+
 func (a *AudienceRepo) Star(ctx context.Context, userEmail string, audienceID uint32) error {
 	if audienceID == 0 || userEmail == "" {
 		return fmt.Errorf("audience id and user email cannot be empty")

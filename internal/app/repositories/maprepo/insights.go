@@ -55,6 +55,17 @@ func (i *InsightRepo) Delete(ctx context.Context, insightID uint32) error {
 	return nil
 }
 
+func (i *InsightRepo) Update(ctx context.Context, insight assets.Insight) error {
+	ins, err := i.Get(ctx, insight.ID)
+	if err != nil {
+		return err
+	}
+
+	key := fmt.Sprintf("%d", ins.ID)
+	i.insightConn.Upsert(key, insight)
+	return nil
+}
+
 func (a *InsightRepo) Star(ctx context.Context, userEmail string, insightID uint32) error {
 	if insightID == 0 || userEmail == "" {
 		return fmt.Errorf("insight id and user email cannot be empty")
