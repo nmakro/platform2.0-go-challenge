@@ -22,7 +22,7 @@ func TestSaveAudience(t *testing.T) {
 		Gender:           assets.Male,
 	}
 
-	err := audienceRepo.AddAudience(context.Background(), aud)
+	err := audienceRepo.Add(context.Background(), aud)
 
 	assert.NoError(t, err)
 }
@@ -38,7 +38,7 @@ func TestSaveAudienceNoID(t *testing.T) {
 		Gender:           assets.Male,
 	}
 
-	err := audienceRepo.AddAudience(context.Background(), aud)
+	err := audienceRepo.Add(context.Background(), aud)
 
 	expectedErr := assets.NewAssetNoIDError()
 	assert.ErrorAs(t, err, &expectedErr)
@@ -55,7 +55,7 @@ func TestGetAudience(t *testing.T) {
 		Gender:           assets.Male,
 	}
 
-	err := audienceRepo.AddAudience(context.Background(), aud)
+	err := audienceRepo.Add(context.Background(), aud)
 	assert.NoError(t, err)
 
 	res, err := audienceRepo.Get(context.Background(), aud.ID)
@@ -74,7 +74,7 @@ func TestDeleteAudience(t *testing.T) {
 		Gender:           assets.Male,
 	}
 
-	err := audienceRepo.AddAudience(context.Background(), aud)
+	err := audienceRepo.Add(context.Background(), aud)
 	assert.NoError(t, err)
 
 	err = audienceRepo.Delete(context.Background(), aud.ID)
@@ -96,7 +96,7 @@ func TestUpdateAudience(t *testing.T) {
 		Gender:           assets.Male,
 	}
 
-	err := audienceRepo.AddAudience(context.Background(), aud)
+	err := audienceRepo.Add(context.Background(), aud)
 	assert.NoError(t, err)
 
 	aud.Gender = assets.Female

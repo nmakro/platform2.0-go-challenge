@@ -20,7 +20,7 @@ func NewAInsightRepo(insightConn, starConn *Client) *InsightRepo {
 	}
 }
 
-func (i *InsightRepo) AddInsight(ctx context.Context, insight assets.Insight) error {
+func (i *InsightRepo) Add(ctx context.Context, insight assets.Insight) error {
 	err := assets.ValidateInsightID(insight)
 	if err != nil {
 		return err

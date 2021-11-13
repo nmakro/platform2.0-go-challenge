@@ -20,7 +20,7 @@ func NewChartRepo(chartConn, starConn *Client) *ChartRepo {
 	}
 }
 
-func (c *ChartRepo) AddChart(ctx context.Context, chart assets.Chart) error {
+func (c *ChartRepo) Add(ctx context.Context, chart assets.Chart) error {
 	err := assets.ValidateChart(chart)
 	if err != nil {
 		return err

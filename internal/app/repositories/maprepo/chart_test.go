@@ -21,7 +21,7 @@ func TestSaveChart(t *testing.T) {
 		Title: "test chart",
 	}
 
-	err := chartRepo.AddChart(context.Background(), chart)
+	err := chartRepo.Add(context.Background(), chart)
 
 	assert.NoError(t, err)
 }
@@ -36,7 +36,7 @@ func TestSaveChartNoID(t *testing.T) {
 		Title: "test chart",
 	}
 
-	err := chartRepo.AddChart(context.Background(), chart)
+	err := chartRepo.Add(context.Background(), chart)
 
 	expectedErr := assets.NewAssetNoIDError()
 	assert.ErrorAs(t, err, &expectedErr)
@@ -52,7 +52,7 @@ func TestGetChart(t *testing.T) {
 		Title: "test chart",
 	}
 
-	err := chartRepo.AddChart(context.Background(), chart)
+	err := chartRepo.Add(context.Background(), chart)
 	assert.NoError(t, err)
 
 	res, err := chartRepo.Get(context.Background(), chart.ID)
@@ -70,7 +70,7 @@ func TestDeleteChart(t *testing.T) {
 		Title: "test chart",
 	}
 
-	err := chartRepo.AddChart(context.Background(), chart)
+	err := chartRepo.Add(context.Background(), chart)
 	assert.NoError(t, err)
 
 	err = chartRepo.Delete(context.Background(), chart.ID)
@@ -91,7 +91,7 @@ func TestUpdateChart(t *testing.T) {
 		Title: "test chart",
 	}
 
-	err := chartRepo.AddChart(context.Background(), chart)
+	err := chartRepo.Add(context.Background(), chart)
 	assert.NoError(t, err)
 
 	chart.Title = "updated title"

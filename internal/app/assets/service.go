@@ -51,11 +51,11 @@ func (s AssetService) ValidateAudience(a Audience) bool {
 }
 
 func (s AssetService) AddAudience(ctx context.Context, a Audience) error {
-	return s.AudienceRepo.AddAudience(ctx, a)
+	return s.AudienceRepo.Add(ctx, a)
 }
 
-func (s AssetService) UpdateAudience(ctx context.Context, audienceID uint32, desc string) error {
-	return s.AudienceRepo.Update(ctx, audienceID, desc)
+func (s AssetService) UpdateAudience(ctx context.Context, a Audience) error {
+	return s.AudienceRepo.Update(ctx, a)
 }
 
 func (s AssetService) DeleteAudience(ctx context.Context, audienceID uint32) error {
@@ -74,20 +74,20 @@ func (s AssetService) AddChart(ctx context.Context, c Chart) error {
 	return s.ChartRepo.Add(ctx, c)
 }
 
-func (s AssetService) UpdateChart(ctx context.Context, chartID uint32, desc string) error {
-	return s.ChartRepo.Update(ctx, chartID, desc)
+func (s AssetService) UpdateChart(ctx context.Context, chart Chart) error {
+	return s.ChartRepo.Update(ctx, chart)
 }
 
 func (s AssetService) DeleteChart(ctx context.Context, chartID uint32) error {
 	return s.ChartRepo.Delete(ctx, chartID)
 }
 
-func (s AssetService) StarChart(ctx context.Context, chartID, userID uint32) error {
-	return s.ChartRepo.Star(ctx, chartID, userID)
+func (s AssetService) StarChart(ctx context.Context, userEmail string, chartID uint32) error {
+	return s.ChartRepo.Star(ctx, userEmail, chartID)
 }
 
-func (s AssetService) UnstarChart(ctx context.Context, chartID, userID uint32) error {
-	return s.ChartRepo.Unstar(ctx, chartID, userID)
+func (s AssetService) UnstarChart(ctx context.Context, userEmail string, chartID uint32) error {
+	return s.ChartRepo.Unstar(ctx, userEmail, chartID)
 }
 
 func (s AssetService) AddInsight(ctx context.Context, i Insight) error {
@@ -98,14 +98,14 @@ func (s AssetService) DeleteInsight(ctx context.Context, insightID uint32) error
 	return s.InsightRepo.Delete(ctx, insightID)
 }
 
-func (s AssetService) UpdateInsight(ctx context.Context, insightID uint32, desc string) error {
-	return s.InsightRepo.Update(ctx, insightID, desc)
+func (s AssetService) UpdateInsight(ctx context.Context, insight Insight) error {
+	return s.InsightRepo.Update(ctx, insight)
 }
 
-func (s AssetService) StartInsight(ctx context.Context, insightID uint32, userID uint32) error {
-	return s.InsightRepo.Star(ctx, insightID, userID)
+func (s AssetService) StartInsight(ctx context.Context, userEmail string, insightID uint32) error {
+	return s.InsightRepo.Star(ctx, userEmail, insightID)
 }
 
-func (s AssetService) UnstarInsight(ctx context.Context, insightID uint32, userID uint32) error {
-	return s.InsightRepo.Unstar(ctx, insightID, userID)
+func (s AssetService) UnstarInsight(ctx context.Context, userEmail string, insightID uint32) error {
+	return s.InsightRepo.Unstar(ctx, userEmail, insightID)
 }

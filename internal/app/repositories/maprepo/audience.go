@@ -20,7 +20,7 @@ func NewAudienceRepo(audConn, starConn *Client) *AudienceRepo {
 	}
 }
 
-func (a *AudienceRepo) AddAudience(ctx context.Context, audience assets.Audience) error {
+func (a *AudienceRepo) Add(ctx context.Context, audience assets.Audience) error {
 	err := assets.ValidateAudience(audience)
 	if err != nil {
 		return err

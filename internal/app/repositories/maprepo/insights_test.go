@@ -21,7 +21,7 @@ func TestSaveInsight(t *testing.T) {
 		Topic: "sales",
 	}
 
-	err := insightRepo.AddInsight(context.Background(), ins)
+	err := insightRepo.Add(context.Background(), ins)
 
 	assert.NoError(t, err)
 }
@@ -36,7 +36,7 @@ func TestSaveInsightNoID(t *testing.T) {
 		Topic: "sales",
 	}
 
-	err := insightRepo.AddInsight(context.Background(), ins)
+	err := insightRepo.Add(context.Background(), ins)
 
 	expectedErr := assets.NewAssetNoIDError()
 	assert.ErrorAs(t, err, &expectedErr)
@@ -52,7 +52,7 @@ func TestGetInsight(t *testing.T) {
 		Topic: "sales",
 	}
 
-	err := insightRepo.AddInsight(context.Background(), ins)
+	err := insightRepo.Add(context.Background(), ins)
 	assert.NoError(t, err)
 
 	res, err := insightRepo.Get(context.Background(), ins.ID)
@@ -70,7 +70,7 @@ func TestDeleteInsight(t *testing.T) {
 		Topic: "sales",
 	}
 
-	err := insightRepo.AddInsight(context.Background(), ins)
+	err := insightRepo.Add(context.Background(), ins)
 	assert.NoError(t, err)
 
 	err = insightRepo.Delete(context.Background(), ins.ID)
@@ -90,7 +90,7 @@ func TestUpdateInsight(t *testing.T) {
 		ID:    123,
 		Topic: "sales",
 	}
-	err := insightRepo.AddInsight(context.Background(), ins)
+	err := insightRepo.Add(context.Background(), ins)
 	assert.NoError(t, err)
 
 	ins.Topic = "new topic"
