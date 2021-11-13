@@ -109,3 +109,25 @@ func FromAssetString(a Asset) Asset {
 		return UnknownAsset
 	}
 }
+
+type audienceValidator = func(a Audience) error
+
+func ValidateAudienceID(a Audience) error {
+	if a.ID == 0 {
+		return NewAssetNoIDError()
+	}
+	return nil
+}
+
+var assetValidators = []audienceValidator{
+	ValidateAudienceID,
+}
+
+func ValidateAudience(a Audience) error {
+	for _, f := range assetValidators {
+		if err := f(a); err != nil {
+			return err
+		}
+	}
+	return nil
+}

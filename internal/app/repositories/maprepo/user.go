@@ -23,23 +23,24 @@ func (u *UserDBRepo) AddUser(ctx context.Context, usr user.User) error {
 		return err
 	}
 
-	if u.conn.Insert(usr.Email, usr) {
-	} else {
+	if ok := u.conn.Insert(usr.Email, usr); !ok {
 		return fmt.Errorf("user email already exists")
 	}
 	return nil
 }
 
 func (u *UserDBRepo) GetByEmail(ctx context.Context, email string) (user.User, error) {
-	res, exists := u.conn.Get(email)
+	res, err := u.conn.Get(email)
 
-	if exists {
-		if v, ok := res.(user.User); ok {
-			return v, nil
-		}
-		return user.User{}, fmt.Errorf("error in reading user")
+	if err != nil {
+		return user.User{}, err
 	}
-	return user.User{}, fmt.Errorf("user not found")
+
+	v, ok := res.(user.User)
+	if !ok {
+		return user.User{}, fmt.Errorf("error in get user, read unexpected value %v", res)
+	}
+	return v, nil
 }
 
 func (u *UserDBRepo) Delete(ctx context.Context, userEmail string) (user.User, error) {

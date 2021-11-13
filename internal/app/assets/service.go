@@ -51,7 +51,7 @@ func (s AssetService) ValidateAudience(a Audience) bool {
 }
 
 func (s AssetService) AddAudience(ctx context.Context, a Audience) error {
-	return s.AudienceRepo.Add(ctx, a)
+	return s.AudienceRepo.AddAudience(ctx, a)
 }
 
 func (s AssetService) UpdateAudience(ctx context.Context, audienceID uint32, desc string) error {
@@ -62,12 +62,12 @@ func (s AssetService) DeleteAudience(ctx context.Context, audienceID uint32) err
 	return s.AudienceRepo.Delete(ctx, audienceID)
 }
 
-func (s AssetService) StarAudience(ctx context.Context, audienceID, userID uint32) error {
-	return s.AudienceRepo.Star(ctx, audienceID, userID)
+func (s AssetService) StarAudience(ctx context.Context, userEmail string, audienceID uint32) error {
+	return s.AudienceRepo.Star(ctx, userEmail, audienceID)
 }
 
-func (s AssetService) UnstarAudience(ctx context.Context, audienceID, userID uint32) error {
-	return s.AudienceRepo.Unstar(ctx, audienceID, userID)
+func (s AssetService) UnstarAudience(ctx context.Context, userEmail string, audienceID uint32) error {
+	return s.AudienceRepo.Unstar(ctx, userEmail, audienceID)
 }
 
 func (s AssetService) AddChart(ctx context.Context, c Chart) error {

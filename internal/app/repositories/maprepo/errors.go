@@ -1,24 +1,23 @@
 package maprepo
 
-import "fmt"
-
-type DBError struct {
-	inner error
-	msg   string
+type ErrDuplicateEntry struct {
 }
 
-// Error function.
-func (r *DBError) Error() string {
-	if r.inner != nil {
-		return fmt.Sprintf("Repository error: `%s` with inner error `%s`", r.msg, r.inner.Error())
-	}
-	return r.msg
+func NewDuplicateEntryError() *ErrDuplicateEntry {
+	return &ErrDuplicateEntry{}
 }
 
-// NewDBError constructor.
-func NewRepositoryError(msg string, err error) *DBError {
-	return &DBError{
-		msg:   msg,
-		inner: err,
-	}
+func (e ErrDuplicateEntry) Error() string {
+	return "duplicate entry error"
+}
+
+type ErrEntityNotFound struct {
+}
+
+func NewEntityNotFoundError() *ErrEntityNotFound {
+	return &ErrEntityNotFound{}
+}
+
+func (e ErrEntityNotFound) Error() string {
+	return "entity not found error"
 }
