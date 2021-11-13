@@ -119,13 +119,35 @@ func ValidateAudienceID(a Audience) error {
 	return nil
 }
 
-var assetValidators = []audienceValidator{
+var audienceValidators = []audienceValidator{
 	ValidateAudienceID,
 }
 
 func ValidateAudience(a Audience) error {
-	for _, f := range assetValidators {
+	for _, f := range audienceValidators {
 		if err := f(a); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type insightValidator = func(i Insight) error
+
+func ValidateInsightID(i Insight) error {
+	if i.ID == 0 {
+		return NewAssetNoIDError()
+	}
+	return nil
+}
+
+var insightValidators = []insightValidator{
+	ValidateInsightID,
+}
+
+func ValidateInsight(i Insight) error {
+	for _, f := range insightValidators {
+		if err := f(i); err != nil {
 			return err
 		}
 	}
