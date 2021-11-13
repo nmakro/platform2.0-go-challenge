@@ -153,3 +153,25 @@ func ValidateInsight(i Insight) error {
 	}
 	return nil
 }
+
+type chartValidator = func(c Chart) error
+
+func ValidateChartID(c Chart) error {
+	if c.ID == 0 {
+		return NewAssetNoIDError()
+	}
+	return nil
+}
+
+var chartValidators = []chartValidator{
+	ValidateChartID,
+}
+
+func ValidateChart(c Chart) error {
+	for _, f := range chartValidators {
+		if err := f(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
