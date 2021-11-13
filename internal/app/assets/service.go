@@ -1,9 +1,5 @@
 package assets
 
-import (
-	"context"
-)
-
 // type AudienceService interface {
 // 	Add(ctx context.Context, a Audience) error
 // 	Update(ctx context.Context, audienceID uint32) error
@@ -44,68 +40,4 @@ func NewAssetService(audience AudienceRepository, chart ChartRepository, insight
 		ChartRepo:    chart,
 		InsightRepo:  insight,
 	}
-}
-
-func (s AssetService) ValidateAudience(a Audience) bool {
-	return a.AgeGroup.IsValid()
-}
-
-func (s AssetService) AddAudience(ctx context.Context, a Audience) error {
-	return s.AudienceRepo.Add(ctx, a)
-}
-
-func (s AssetService) UpdateAudience(ctx context.Context, a Audience) error {
-	return s.AudienceRepo.Update(ctx, a)
-}
-
-func (s AssetService) DeleteAudience(ctx context.Context, audienceID uint32) error {
-	return s.AudienceRepo.Delete(ctx, audienceID)
-}
-
-func (s AssetService) StarAudience(ctx context.Context, userEmail string, audienceID uint32) error {
-	return s.AudienceRepo.Star(ctx, userEmail, audienceID)
-}
-
-func (s AssetService) UnstarAudience(ctx context.Context, userEmail string, audienceID uint32) error {
-	return s.AudienceRepo.Unstar(ctx, userEmail, audienceID)
-}
-
-func (s AssetService) AddChart(ctx context.Context, c Chart) error {
-	return s.ChartRepo.Add(ctx, c)
-}
-
-func (s AssetService) UpdateChart(ctx context.Context, chart Chart) error {
-	return s.ChartRepo.Update(ctx, chart)
-}
-
-func (s AssetService) DeleteChart(ctx context.Context, chartID uint32) error {
-	return s.ChartRepo.Delete(ctx, chartID)
-}
-
-func (s AssetService) StarChart(ctx context.Context, userEmail string, chartID uint32) error {
-	return s.ChartRepo.Star(ctx, userEmail, chartID)
-}
-
-func (s AssetService) UnstarChart(ctx context.Context, userEmail string, chartID uint32) error {
-	return s.ChartRepo.Unstar(ctx, userEmail, chartID)
-}
-
-func (s AssetService) AddInsight(ctx context.Context, i Insight) error {
-	return s.InsightRepo.Add(ctx, i)
-}
-
-func (s AssetService) DeleteInsight(ctx context.Context, insightID uint32) error {
-	return s.InsightRepo.Delete(ctx, insightID)
-}
-
-func (s AssetService) UpdateInsight(ctx context.Context, insight Insight) error {
-	return s.InsightRepo.Update(ctx, insight)
-}
-
-func (s AssetService) StartInsight(ctx context.Context, userEmail string, insightID uint32) error {
-	return s.InsightRepo.Star(ctx, userEmail, insightID)
-}
-
-func (s AssetService) UnstarInsight(ctx context.Context, userEmail string, insightID uint32) error {
-	return s.InsightRepo.Unstar(ctx, userEmail, insightID)
 }
