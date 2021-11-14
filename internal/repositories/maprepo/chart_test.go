@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
-	repo "github.com/nmakro/platform2.0-go-challenge/internal/app/repositories/maprepo"
+	repo "github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo"
 	"github.com/stretchr/testify/assert"
 )
 

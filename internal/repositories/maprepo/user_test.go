@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
-	repo "github.com/nmakro/platform2.0-go-challenge/internal/app/repositories/maprepo"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/user"
+	repo "github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo"
 	"github.com/stretchr/testify/assert"
 	_ "github.com/stretchr/testify/assert"
 )
