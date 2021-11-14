@@ -90,12 +90,12 @@ func (a *InsightRepo) Star(ctx context.Context, userEmail string, insightID uint
 	v, err := a.starConn.Get(userEmail)
 	notFound := NewEntityNotFoundError()
 	if err != nil && !errors.As(err, &notFound) {
-		return fmt.Errorf("error while reading stared audiences for user with email: %s", userEmail)
+		return fmt.Errorf("error while reading starred audiences for user with email: %s", userEmail)
 	}
 
-	if stared, ok := v.([]uint32); ok {
-		stared = append(stared, insightID)
-		a.starConn.Upsert(userEmail, stared)
+	if starred, ok := v.([]uint32); ok {
+		starred = append(starred, insightID)
+		a.starConn.Upsert(userEmail, starred)
 	} else {
 		res := make([]uint32, 0, 20)
 		res = append(res, insightID)
@@ -115,29 +115,29 @@ func (i *InsightRepo) Unstar(ctx context.Context, userEmail string, insightID ui
 
 	switch {
 	case err != nil && errors.As(err, &notFound):
-		return fmt.Errorf("cannot find stared insights assets for user: %s", userEmail)
+		return fmt.Errorf("cannot find starred insights assets for user: %s", userEmail)
 	case err != nil && !errors.As(err, &notFound):
 		return err
 	default:
-		if stared, ok := v.([]uint32); ok {
+		if starred, ok := v.([]uint32); ok {
 			found := false
-			for i := range stared {
-				if stared[i] == insightID {
-					stared[i] = stared[len(stared)-1]
+			for i := range starred {
+				if starred[i] == insightID {
+					starred[i] = starred[len(starred)-1]
 					found = true
 					break
 				}
 			}
 			if found {
-				i.starConn.Upsert(userEmail, stared[:len(stared)-1])
+				i.starConn.Upsert(userEmail, starred[:len(starred)-1])
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("cannot find stared insight asset: %v for user: %s", insightID, userEmail)
+	return fmt.Errorf("cannot find starred insight asset: %v for user: %s", insightID, userEmail)
 }
 
-func (i *InsightRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (i *InsightRepo) GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}
@@ -147,9 +147,9 @@ func (i *InsightRepo) GetStaredIDsForUser(ctx context.Context, userEmail string)
 		return nil, err
 	}
 
-	stared, ok := v.([]uint32)
+	starred, ok := v.([]uint32)
 	if !ok {
-		return []uint32{}, fmt.Errorf("error while reading stared insights for user: %s", userEmail)
+		return []uint32{}, fmt.Errorf("error while reading starred insights for user: %s", userEmail)
 	}
-	return stared, nil
+	return starred, nil
 }

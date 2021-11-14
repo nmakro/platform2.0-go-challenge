@@ -3,11 +3,17 @@ package assets
 import "context"
 
 func (s AssetService) AddChart(ctx context.Context, c Chart) error {
+	if err := ValidateChart(c); err != nil {
+		return err
+	}
 	return s.ChartRepo.Add(ctx, c)
 }
 
-func (s AssetService) UpdateChart(ctx context.Context, chart Chart) error {
-	return s.ChartRepo.Update(ctx, chart)
+func (s AssetService) UpdateChart(ctx context.Context, c Chart) error {
+	if err := ValidateChart(c); err != nil {
+		return err
+	}
+	return s.ChartRepo.Update(ctx, c)
 }
 
 func (s AssetService) GetChart(ctx context.Context, chartID uint32) (Chart, error) {
@@ -19,7 +25,31 @@ func (s AssetService) DeleteChart(ctx context.Context, chartID uint32) error {
 }
 
 func (s AssetService) StarChart(ctx context.Context, userEmail string, chartID uint32) error {
+	if _, err := s.userService.GetUser(ctx, userEmail); err != nil {
+		return err
+	}
 	return s.ChartRepo.Star(ctx, userEmail, chartID)
+}
+
+func (s AssetService) GetChartsForUser(ctx context.Context, userEmail string) ([]Chart, error) {
+	_, err := s.userService.GetUser(ctx, userEmail)
+	if err != nil {
+		return []Chart{}, err
+	}
+
+	ids, err := s.ChartRepo.GetStarredIDsForUser(ctx, userEmail)
+
+	if err != nil {
+		return []Chart{}, err
+	}
+
+	charts, err := s.ChartRepo.GetMany(ctx, ids)
+
+	if err != nil {
+		return []Chart{}, err
+	}
+
+	return charts, nil
 }
 
 func (s AssetService) UnstarChart(ctx context.Context, userEmail string, chartID uint32) error {

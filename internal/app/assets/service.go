@@ -1,5 +1,7 @@
 package assets
 
+import "github.com/nmakro/platform2.0-go-challenge/internal/app/user"
+
 // type AudienceService interface {
 // 	Add(ctx context.Context, a Audience) error
 // 	Update(ctx context.Context, audienceID uint32) error
@@ -29,13 +31,15 @@ package assets
 // }
 
 type AssetService struct {
+	userService  user.UserService
 	AudienceRepo AudienceRepository
 	ChartRepo    ChartRepository
 	InsightRepo  InsightRepository
 }
 
-func NewAssetService(audience AudienceRepository, chart ChartRepository, insight InsightRepository) *AssetService {
+func NewAssetService(userService user.UserService, audience AudienceRepository, chart ChartRepository, insight InsightRepository) *AssetService {
 	return &AssetService{
+		userService:  userService,
 		AudienceRepo: audience,
 		ChartRepo:    chart,
 		InsightRepo:  insight,

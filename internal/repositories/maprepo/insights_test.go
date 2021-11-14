@@ -150,10 +150,10 @@ func TestStarInsightForUser(t *testing.T) {
 	err := insightRepo.Star(context.Background(), userEmail, insightID)
 	assert.NoError(t, err)
 
-	stared, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := insightRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
 func TestUnStarInsightForUser(t *testing.T) {
@@ -174,13 +174,13 @@ func TestUnStarInsightForUser(t *testing.T) {
 	err = insightRepo.Unstar(context.Background(), userEmail, insightID1)
 	assert.NoError(t, err)
 
-	stared, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := insightRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{insightID2}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
-func TestGetStaredInsightIDsForUser(t *testing.T) {
+func TestGetstarredInsightIDsForUser(t *testing.T) {
 	insightRepo, down := SetUpInsight()
 
 	defer down()
@@ -199,7 +199,7 @@ func TestGetStaredInsightIDsForUser(t *testing.T) {
 	err = insightRepo.Star(context.Background(), userEmail, insightID3)
 	assert.NoError(t, err)
 
-	res, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	res, err := insightRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{insightID1, insightID2, insightID3}, res)
 }

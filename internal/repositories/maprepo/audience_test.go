@@ -159,10 +159,10 @@ func TestStarAudienceForUser(t *testing.T) {
 	err := audienceRepo.Star(context.Background(), userEmail, audienceID)
 	assert.NoError(t, err)
 
-	stared, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := audienceRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
 func TestUnStarAudienceForUser(t *testing.T) {
@@ -183,13 +183,13 @@ func TestUnStarAudienceForUser(t *testing.T) {
 	err = audienceRepo.Unstar(context.Background(), userEmail, audienceID1)
 	assert.NoError(t, err)
 
-	stared, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := audienceRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{audienceID2}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
-func TestGetStaredAudienceIDsForUser(t *testing.T) {
+func TestGetstarredAudienceIDsForUser(t *testing.T) {
 	audienceRepo, down := SetUpAudience()
 
 	defer down()
@@ -208,7 +208,7 @@ func TestGetStaredAudienceIDsForUser(t *testing.T) {
 	err = audienceRepo.Star(context.Background(), userEmail, audienceID3)
 	assert.NoError(t, err)
 
-	res, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	res, err := audienceRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{audienceID1, audienceID2, audienceID3}, res)
 }

@@ -90,12 +90,12 @@ func (a *AudienceRepo) Star(ctx context.Context, userEmail string, audienceID ui
 	v, err := a.starConn.Get(userEmail)
 	notFound := NewEntityNotFoundError()
 	if err != nil && !errors.As(err, &notFound) {
-		return fmt.Errorf("error while reading stared audiences for user with email: %s", userEmail)
+		return fmt.Errorf("error while reading starred audiences for user with email: %s", userEmail)
 	}
 
-	if stared, ok := v.([]uint32); ok {
-		stared = append(stared, audienceID)
-		a.starConn.Upsert(userEmail, stared)
+	if starred, ok := v.([]uint32); ok {
+		starred = append(starred, audienceID)
+		a.starConn.Upsert(userEmail, starred)
 	} else {
 		res := make([]uint32, 0, 20)
 		res = append(res, audienceID)
@@ -115,29 +115,29 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 
 	switch {
 	case err != nil && errors.As(err, &notFound):
-		return fmt.Errorf("cannot find stared audience assets for user: %s", userEmail)
+		return fmt.Errorf("cannot find starred audience assets for user: %s", userEmail)
 	case err != nil && !errors.As(err, &notFound): // This Will never evaluate but hypothetically that could be an internal db error.
 		return err
 	default:
-		if stared, ok := v.([]uint32); ok {
+		if starred, ok := v.([]uint32); ok {
 			found := false
-			for i := range stared {
-				if stared[i] == audienceID {
-					stared[i] = stared[len(stared)-1]
+			for i := range starred {
+				if starred[i] == audienceID {
+					starred[i] = starred[len(starred)-1]
 					found = true
 					break
 				}
 			}
 			if found {
-				a.starConn.Upsert(userEmail, stared[:len(stared)-1])
+				a.starConn.Upsert(userEmail, starred[:len(starred)-1])
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("cannot find stared audience asset: %v for user: %s", audienceID, userEmail)
+	return fmt.Errorf("cannot find starred audience asset: %v for user: %s", audienceID, userEmail)
 }
 
-func (a *AudienceRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (a *AudienceRepo) GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}
@@ -147,9 +147,9 @@ func (a *AudienceRepo) GetStaredIDsForUser(ctx context.Context, userEmail string
 		return nil, err
 	}
 
-	stared, ok := v.([]uint32)
+	starred, ok := v.([]uint32)
 	if !ok {
-		return []uint32{}, fmt.Errorf("error while reading stared audiences for user: %s", userEmail)
+		return []uint32{}, fmt.Errorf("error while reading starred audiences for user: %s", userEmail)
 	}
-	return stared, nil
+	return starred, nil
 }

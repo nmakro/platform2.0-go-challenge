@@ -17,7 +17,7 @@ func NewUserRepo(client *Client) *UserDBRepo {
 	}
 }
 
-func (u *UserDBRepo) AddUser(ctx context.Context, usr user.User) error {
+func (u *UserDBRepo) Add(ctx context.Context, usr user.User) error {
 	if usr.Email == "" {
 		err := user.NewEmailMissingError()
 		return err
@@ -43,15 +43,15 @@ func (u *UserDBRepo) GetByEmail(ctx context.Context, email string) (user.User, e
 	return v, nil
 }
 
-func (u *UserDBRepo) Delete(ctx context.Context, userEmail string) (user.User, error) {
+func (u *UserDBRepo) Delete(ctx context.Context, userEmail string) error {
 	v, exists := u.conn.Delete(userEmail)
 
 	if exists {
-		if usr, ok := v.(user.User); ok {
-			return usr, nil
+		if _, ok := v.(user.User); ok {
+			return nil
 		} else {
-			return user.User{}, fmt.Errorf("error while reading user from db in user delete")
+			return fmt.Errorf("error while reading user from db in user delete")
 		}
 	}
-	return user.User{}, nil
+	return nil
 }

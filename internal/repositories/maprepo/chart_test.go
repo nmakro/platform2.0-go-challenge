@@ -151,10 +151,10 @@ func TestStarChartForUser(t *testing.T) {
 	err := chartRepo.Star(context.Background(), userEmail, chartID)
 	assert.NoError(t, err)
 
-	stared, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := chartRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
 func TestUnStarChartForUser(t *testing.T) {
@@ -175,13 +175,13 @@ func TestUnStarChartForUser(t *testing.T) {
 	err = chartRepo.Unstar(context.Background(), userEmail, chartID1)
 	assert.NoError(t, err)
 
-	stared, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	starred, err := chartRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{chartID2}
-	assert.Equal(t, expected, stared)
+	assert.Equal(t, expected, starred)
 }
 
-func TestGetStaredChartsIDsForUser(t *testing.T) {
+func TestGetstarredChartsIDsForUser(t *testing.T) {
 	chartRepo, down := SetUpChart()
 
 	defer down()
@@ -200,7 +200,7 @@ func TestGetStaredChartsIDsForUser(t *testing.T) {
 	err = chartRepo.Star(context.Background(), userEmail, chartID3)
 	assert.NoError(t, err)
 
-	res, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
+	res, err := chartRepo.GetStarredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{chartID1, chartID2, chartID3}, res)
 }

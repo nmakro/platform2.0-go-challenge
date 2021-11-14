@@ -10,7 +10,7 @@ type AudienceRepository interface {
 	Delete(ctx context.Context, AudienceID uint32) error
 	Star(ctx context.Context, userEmail string, audienceID uint32) error
 	Unstar(ctx context.Context, userEmail string, audienceID uint32) error
-	GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
+	GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
 }
 
 type ChartRepository interface {
@@ -21,7 +21,7 @@ type ChartRepository interface {
 	Delete(ctx context.Context, ChartID uint32) error
 	Star(ctx context.Context, UserEmail string, ChartID uint32) error
 	Unstar(ctx context.Context, UserEmail string, ChartID uint32) error
-	GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
+	GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
 }
 
 type InsightRepository interface {
@@ -32,5 +32,5 @@ type InsightRepository interface {
 	Delete(ctx context.Context, insightID uint32) error
 	Star(ctx context.Context, userEmail string, insightID uint32) error
 	Unstar(ctx context.Context, userEmail string, insightID uint32) error
-	GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
+	GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error)
 }

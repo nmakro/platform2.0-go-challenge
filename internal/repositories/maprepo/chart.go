@@ -90,12 +90,12 @@ func (c *ChartRepo) Star(ctx context.Context, userEmail string, chartID uint32) 
 	v, err := c.starConn.Get(userEmail)
 	notFound := NewEntityNotFoundError()
 	if err != nil && !errors.As(err, &notFound) {
-		return fmt.Errorf("error while reading stared charts for user with email: %s", userEmail)
+		return fmt.Errorf("error while reading starred charts for user with email: %s", userEmail)
 	}
 
-	if stared, ok := v.([]uint32); ok {
-		stared = append(stared, chartID)
-		c.starConn.Upsert(userEmail, stared)
+	if starred, ok := v.([]uint32); ok {
+		starred = append(starred, chartID)
+		c.starConn.Upsert(userEmail, starred)
 	} else {
 		res := make([]uint32, 0, 20)
 		res = append(res, chartID)
@@ -115,29 +115,29 @@ func (c *ChartRepo) Unstar(ctx context.Context, userEmail string, chartID uint32
 
 	switch {
 	case err != nil && errors.As(err, &notFound):
-		return fmt.Errorf("cannot find stared audience assets for user: %s", userEmail)
+		return fmt.Errorf("cannot find starred audience assets for user: %s", userEmail)
 	case err != nil && !errors.As(err, &notFound):
 		return err
 	default:
-		if stared, ok := v.([]uint32); ok {
+		if starred, ok := v.([]uint32); ok {
 			found := false
-			for i := range stared {
-				if stared[i] == chartID {
-					stared[i] = stared[len(stared)-1]
+			for i := range starred {
+				if starred[i] == chartID {
+					starred[i] = starred[len(starred)-1]
 					found = true
 					break
 				}
 			}
 			if found {
-				c.starConn.Upsert(userEmail, stared[:len(stared)-1])
+				c.starConn.Upsert(userEmail, starred[:len(starred)-1])
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("cannot find stared chart asset: %v for user: %s", chartID, userEmail)
+	return fmt.Errorf("cannot find starred chart asset: %v for user: %s", chartID, userEmail)
 }
 
-func (c *ChartRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (c *ChartRepo) GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}
@@ -147,9 +147,9 @@ func (c *ChartRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) (
 		return nil, err
 	}
 
-	stared, ok := v.([]uint32)
+	starred, ok := v.([]uint32)
 	if !ok {
-		return []uint32{}, fmt.Errorf("error while reading stared charts for user: %s", userEmail)
+		return []uint32{}, fmt.Errorf("error while reading starred charts for user: %s", userEmail)
 	}
-	return stared, nil
+	return starred, nil
 }

@@ -23,7 +23,7 @@ func TestSaveUser(t *testing.T) {
 		Password: "@!3aER&4!",
 	}
 
-	err := userRepo.AddUser(context.Background(), u)
+	err := userRepo.Add(context.Background(), u)
 
 	assert.NoError(t, err)
 }
@@ -38,7 +38,7 @@ func TestSaveUserEmptyEmail(t *testing.T) {
 		Password: "@!3aER&4!",
 	}
 
-	err := userRepo.AddUser(context.Background(), u)
+	err := userRepo.Add(context.Background(), u)
 
 	expected := user.NewEmailMissingError()
 	assert.ErrorAs(t, err, &expected)
@@ -55,7 +55,7 @@ func TestGetUser(t *testing.T) {
 		Password: "@!3aER&4!",
 	}
 
-	err := userRepo.AddUser(context.Background(), u)
+	err := userRepo.Add(context.Background(), u)
 	assert.NoError(t, err)
 
 	usr, err := userRepo.GetByEmail(context.Background(), u.Email)
