@@ -46,6 +46,22 @@ func (c *ChartRepo) Get(ctx context.Context, chartID uint32) (assets.Chart, erro
 	return assets.Chart{}, fmt.Errorf("error while reading chart from db.")
 }
 
+func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Chart, error) {
+	res := make([]assets.Chart, 0, len(chartIDs))
+	for _, id := range chartIDs {
+		chart, err := c.Get(ctx, id)
+		if err != nil {
+			var notFound *ErrEntityNotFound
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Chart{}, err
+		}
+		res = append(res, chart)
+	}
+	return res, nil
+}
+
 func (a *ChartRepo) Delete(ctx context.Context, chartID uint32) error {
 	key := fmt.Sprintf("%d", chartID)
 	_, exists := a.chartConn.Delete(key)
@@ -100,7 +116,7 @@ func (c *ChartRepo) Unstar(ctx context.Context, userEmail string, chartID uint32
 	switch {
 	case err != nil && errors.As(err, &notFound):
 		return fmt.Errorf("cannot find stared audience assets for user: %s", userEmail)
-	case err != nil && errors.As(err, &notFound):
+	case err != nil && !errors.As(err, &notFound):
 		return err
 	default:
 		if stared, ok := v.([]uint32); ok {
@@ -121,7 +137,7 @@ func (c *ChartRepo) Unstar(ctx context.Context, userEmail string, chartID uint32
 	return fmt.Errorf("cannot find stared chart asset: %v for user: %s", chartID, userEmail)
 }
 
-func (c *ChartRepo) GetStaredChartIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (c *ChartRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}

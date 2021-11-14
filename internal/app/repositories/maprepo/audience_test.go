@@ -63,6 +63,45 @@ func TestGetAudience(t *testing.T) {
 	assert.Equal(t, aud, res)
 }
 
+func TestGetManyAudience(t *testing.T) {
+	audienceRepo, down := SetUpAudience()
+
+	defer down()
+
+	aud1 := assets.Audience{
+		ID:               1,
+		SocialMediaHours: 235,
+		Gender:           assets.Male,
+	}
+
+	aud2 := assets.Audience{
+		ID:               2,
+		SocialMediaHours: 168,
+		Gender:           assets.Female,
+	}
+
+	aud3 := assets.Audience{
+		ID:               3,
+		SocialMediaHours: 54,
+		Gender:           assets.Male,
+	}
+
+	err := audienceRepo.Add(context.Background(), aud1)
+	assert.NoError(t, err)
+
+	err = audienceRepo.Add(context.Background(), aud2)
+	assert.NoError(t, err)
+
+	err = audienceRepo.Add(context.Background(), aud3)
+	assert.NoError(t, err)
+
+	res, err := audienceRepo.GetMany(context.Background(), []uint32{aud1.ID, aud2.ID, aud3.ID})
+	assert.NoError(t, err)
+
+	expected := []assets.Audience{aud1, aud2, aud3}
+	assert.Equal(t, expected, res)
+}
+
 func TestDeleteAudience(t *testing.T) {
 	audienceRepo, down := SetUpAudience()
 
@@ -120,7 +159,7 @@ func TestStarAudienceForUser(t *testing.T) {
 	err := audienceRepo.Star(context.Background(), userEmail, audienceID)
 	assert.NoError(t, err)
 
-	stared, err := audienceRepo.GetStaredAudienceIDsForUser(context.Background(), userEmail)
+	stared, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
 	assert.Equal(t, expected, stared)
@@ -144,7 +183,7 @@ func TestUnStarAudienceForUser(t *testing.T) {
 	err = audienceRepo.Unstar(context.Background(), userEmail, audienceID1)
 	assert.NoError(t, err)
 
-	stared, err := audienceRepo.GetStaredAudienceIDsForUser(context.Background(), userEmail)
+	stared, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{audienceID2}
 	assert.Equal(t, expected, stared)
@@ -169,7 +208,7 @@ func TestGetStaredAudienceIDsForUser(t *testing.T) {
 	err = audienceRepo.Star(context.Background(), userEmail, audienceID3)
 	assert.NoError(t, err)
 
-	res, err := audienceRepo.GetStaredAudienceIDsForUser(context.Background(), userEmail)
+	res, err := audienceRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{audienceID1, audienceID2, audienceID3}, res)
 }

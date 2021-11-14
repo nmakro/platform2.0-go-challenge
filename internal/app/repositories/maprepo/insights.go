@@ -46,6 +46,22 @@ func (a *InsightRepo) Get(ctx context.Context, insightID uint32) (assets.Insight
 	return assets.Insight{}, fmt.Errorf("error while reading insight from db.")
 }
 
+func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]assets.Insight, error) {
+	res := make([]assets.Insight, 0, len(insightIDs))
+	for _, id := range insightIDs {
+		a, err := a.Get(ctx, id)
+		if err != nil {
+			var notFound *ErrEntityNotFound
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Insight{}, err
+		}
+		res = append(res, a)
+	}
+	return res, nil
+}
+
 func (i *InsightRepo) Delete(ctx context.Context, insightID uint32) error {
 	key := fmt.Sprintf("%d", insightID)
 	_, exists := i.insightConn.Delete(key)
@@ -100,7 +116,7 @@ func (i *InsightRepo) Unstar(ctx context.Context, userEmail string, insightID ui
 	switch {
 	case err != nil && errors.As(err, &notFound):
 		return fmt.Errorf("cannot find stared insights assets for user: %s", userEmail)
-	case err != nil && errors.As(err, &notFound):
+	case err != nil && !errors.As(err, &notFound):
 		return err
 	default:
 		if stared, ok := v.([]uint32); ok {
@@ -121,7 +137,7 @@ func (i *InsightRepo) Unstar(ctx context.Context, userEmail string, insightID ui
 	return fmt.Errorf("cannot find stared insight asset: %v for user: %s", insightID, userEmail)
 }
 
-func (i *InsightRepo) GetStaredInsightsIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (i *InsightRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}

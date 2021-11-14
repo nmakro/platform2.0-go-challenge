@@ -46,6 +46,22 @@ func (a *AudienceRepo) Get(ctx context.Context, audienceID uint32) (assets.Audie
 	return assets.Audience{}, fmt.Errorf("error while reading audience from db.")
 }
 
+func (a *AudienceRepo) GetMany(ctx context.Context, audienceIDs []uint32) ([]assets.Audience, error) {
+	res := make([]assets.Audience, 0, len(audienceIDs))
+	for _, id := range audienceIDs {
+		a, err := a.Get(ctx, id)
+		if err != nil {
+			var notFound *ErrEntityNotFound
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Audience{}, err
+		}
+		res = append(res, a)
+	}
+	return res, nil
+}
+
 func (a *AudienceRepo) Delete(ctx context.Context, audienceID uint32) error {
 	key := fmt.Sprintf("%d", audienceID)
 	_, exists := a.audConn.Delete(key)
@@ -100,7 +116,7 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 	switch {
 	case err != nil && errors.As(err, &notFound):
 		return fmt.Errorf("cannot find stared audience assets for user: %s", userEmail)
-	case err != nil && errors.As(err, &notFound):
+	case err != nil && !errors.As(err, &notFound): // This Will never evaluate but hypothetically that could be an internal db error.
 		return err
 	default:
 		if stared, ok := v.([]uint32); ok {
@@ -121,7 +137,7 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 	return fmt.Errorf("cannot find stared audience asset: %v for user: %s", audienceID, userEmail)
 }
 
-func (a *AudienceRepo) GetStaredAudienceIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
+func (a *AudienceRepo) GetStaredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {
 	if userEmail == "" {
 		return []uint32{}, fmt.Errorf("user email cannot be empty")
 	}

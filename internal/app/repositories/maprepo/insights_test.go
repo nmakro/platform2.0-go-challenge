@@ -60,6 +60,42 @@ func TestGetInsight(t *testing.T) {
 	assert.Equal(t, ins, res)
 }
 
+func TestGetInsights(t *testing.T) {
+	insightRepo, down := SetUpInsight()
+
+	defer down()
+
+	ins1 := assets.Insight{
+		ID:    1,
+		Topic: "sales",
+	}
+
+	ins2 := assets.Insight{
+		ID:    2,
+		Topic: "social media",
+	}
+
+	ins3 := assets.Insight{
+		ID:    3,
+		Topic: "sports",
+	}
+
+	err := insightRepo.Add(context.Background(), ins1)
+	assert.NoError(t, err)
+
+	err = insightRepo.Add(context.Background(), ins2)
+	assert.NoError(t, err)
+
+	err = insightRepo.Add(context.Background(), ins3)
+	assert.NoError(t, err)
+
+	res, err := insightRepo.GetMany(context.Background(), []uint32{ins1.ID, ins2.ID, ins3.ID})
+	assert.NoError(t, err)
+
+	expected := []assets.Insight{ins1, ins2, ins3}
+	assert.Equal(t, expected, res)
+}
+
 func TestDeleteInsight(t *testing.T) {
 	insightRepo, down := SetUpInsight()
 
@@ -114,7 +150,7 @@ func TestStarInsightForUser(t *testing.T) {
 	err := insightRepo.Star(context.Background(), userEmail, insightID)
 	assert.NoError(t, err)
 
-	stared, err := insightRepo.GetStaredInsightsIDsForUser(context.Background(), userEmail)
+	stared, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
 	assert.Equal(t, expected, stared)
@@ -138,7 +174,7 @@ func TestUnStarInsightForUser(t *testing.T) {
 	err = insightRepo.Unstar(context.Background(), userEmail, insightID1)
 	assert.NoError(t, err)
 
-	stared, err := insightRepo.GetStaredInsightsIDsForUser(context.Background(), userEmail)
+	stared, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{insightID2}
 	assert.Equal(t, expected, stared)
@@ -163,7 +199,7 @@ func TestGetStaredInsightIDsForUser(t *testing.T) {
 	err = insightRepo.Star(context.Background(), userEmail, insightID3)
 	assert.NoError(t, err)
 
-	res, err := insightRepo.GetStaredInsightsIDsForUser(context.Background(), userEmail)
+	res, err := insightRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{insightID1, insightID2, insightID3}, res)
 }

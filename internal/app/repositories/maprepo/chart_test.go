@@ -60,6 +60,42 @@ func TestGetChart(t *testing.T) {
 	assert.Equal(t, chart, res)
 }
 
+func TestGetManyCharts(t *testing.T) {
+	chartRepo, down := SetUpChart()
+
+	defer down()
+
+	chart1 := assets.Chart{
+		ID:    1,
+		Title: "test chart1",
+	}
+
+	chart2 := assets.Chart{
+		ID:    2,
+		Title: "test chart2",
+	}
+
+	chart3 := assets.Chart{
+		ID:    3,
+		Title: "test chart3",
+	}
+
+	err := chartRepo.Add(context.Background(), chart1)
+	assert.NoError(t, err)
+
+	err = chartRepo.Add(context.Background(), chart2)
+	assert.NoError(t, err)
+
+	err = chartRepo.Add(context.Background(), chart3)
+	assert.NoError(t, err)
+
+	res, err := chartRepo.GetMany(context.Background(), []uint32{chart1.ID, chart2.ID, chart3.ID})
+	assert.NoError(t, err)
+
+	expected := []assets.Chart{chart1, chart2, chart3}
+	assert.Equal(t, expected, res)
+}
+
 func TestDeleteChart(t *testing.T) {
 	chartRepo, down := SetUpChart()
 
@@ -115,7 +151,7 @@ func TestStarChartForUser(t *testing.T) {
 	err := chartRepo.Star(context.Background(), userEmail, chartID)
 	assert.NoError(t, err)
 
-	stared, err := chartRepo.GetStaredChartIDsForUser(context.Background(), userEmail)
+	stared, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{123}
 	assert.Equal(t, expected, stared)
@@ -139,7 +175,7 @@ func TestUnStarChartForUser(t *testing.T) {
 	err = chartRepo.Unstar(context.Background(), userEmail, chartID1)
 	assert.NoError(t, err)
 
-	stared, err := chartRepo.GetStaredChartIDsForUser(context.Background(), userEmail)
+	stared, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	expected := []uint32{chartID2}
 	assert.Equal(t, expected, stared)
@@ -164,7 +200,7 @@ func TestGetStaredChartsIDsForUser(t *testing.T) {
 	err = chartRepo.Star(context.Background(), userEmail, chartID3)
 	assert.NoError(t, err)
 
-	res, err := chartRepo.GetStaredChartIDsForUser(context.Background(), userEmail)
+	res, err := chartRepo.GetStaredIDsForUser(context.Background(), userEmail)
 	assert.NoError(t, err)
 	assert.Equal(t, []uint32{chartID1, chartID2, chartID3}, res)
 }
