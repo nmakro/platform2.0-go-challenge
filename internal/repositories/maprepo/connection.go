@@ -27,7 +27,7 @@ func NewClient() *Client {
 func (c *Client) Get(key string) (interface{}, error) {
 	v, exists := c.dbMap.Get(key)
 	if !exists {
-		return nil, NewEntityNotFoundError()
+		return nil, NewNotFoundError()
 	}
 	return v, nil
 }

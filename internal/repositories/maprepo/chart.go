@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 )
 
@@ -29,7 +30,8 @@ func (c *ChartRepo) Add(ctx context.Context, chart assets.Chart) error {
 	key := fmt.Sprintf("%d", chart.ID)
 	ok := c.chartConn.Insert(key, chart)
 	if !ok {
-		return NewDuplicateEntryError()
+		errMsg := fmt.Sprintf("asset chart with id: %v already exists", chart.ID)
+		return app.NewDuplicateEntryError(errMsg)
 	}
 	return nil
 }
@@ -37,13 +39,25 @@ func (c *ChartRepo) Add(ctx context.Context, chart assets.Chart) error {
 func (c *ChartRepo) Get(ctx context.Context, chartID uint32) (assets.Chart, error) {
 	key := fmt.Sprintf("%d", chartID)
 	v, err := c.chartConn.Get(key)
+	var notFound *ErrNotFound
+
+	switch {
+	case err != nil && errors.As(err, &notFound):
+		errMsg := fmt.Sprintf("asset chart with id: %v was not found", chartID)
+		return assets.Chart{}, app.NewEntityNotFoundError(errMsg)
+	case err != nil && !errors.As(err, &notFound):
+		errMsg := "unknown internal error"
+		return assets.Chart{}, NewInternalRepositoryError(errMsg)
+	}
+
 	if err != nil {
 		return assets.Chart{}, err
 	}
 	if chart, ok := v.(assets.Chart); ok {
 		return chart, nil
 	}
-	return assets.Chart{}, fmt.Errorf("error while reading chart from db.")
+	errMsg := fmt.Sprintf("error while reading chart with id: %d from db", chartID)
+	return assets.Chart{}, NewInternalRepositoryError(errMsg)
 }
 
 func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Chart, error) {
@@ -51,11 +65,11 @@ func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Ch
 	for _, id := range chartIDs {
 		chart, err := c.Get(ctx, id)
 		if err != nil {
-			var notFound *ErrEntityNotFound
+			var notFound *app.ErrEntityNotFound
 			if errors.As(err, &notFound) {
 				continue
 			}
-			return []assets.Chart{}, err
+			return []assets.Chart{}, fmt.Errorf("error while reading charts: %w", err)
 		}
 		res = append(res, chart)
 	}
@@ -66,7 +80,8 @@ func (a *ChartRepo) Delete(ctx context.Context, chartID uint32) error {
 	key := fmt.Sprintf("%d", chartID)
 	_, exists := a.chartConn.Delete(key)
 	if !exists {
-		return NewEntityNotFoundError()
+		errMsg := fmt.Sprintf("asset chart with id: %v was not found", chartID)
+		return app.NewEntityNotFoundError(errMsg)
 	}
 	return nil
 }
@@ -88,7 +103,8 @@ func (c *ChartRepo) Star(ctx context.Context, userEmail string, chartID uint32) 
 	}
 
 	v, err := c.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
+	var notFound *ErrNotFound
+
 	if err != nil && !errors.As(err, &notFound) {
 		return fmt.Errorf("error while reading starred charts for user with email: %s", userEmail)
 	}
@@ -111,7 +127,7 @@ func (c *ChartRepo) Unstar(ctx context.Context, userEmail string, chartID uint32
 	}
 
 	v, err := c.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
+	var notFound *app.ErrEntityNotFound
 
 	switch {
 	case err != nil && errors.As(err, &notFound):

@@ -13,6 +13,12 @@ func (a AgeGroup) IsValid() bool {
 	return a.StartYear < a.EndYear && a.StartYear > 18 && a.EndYear < 100
 }
 
+func NewAgeGroup(from, to uint32) AgeGroup {
+	return AgeGroup{
+		StartYear: from,
+		EndYear:   to}
+}
+
 // Gender struct represents Gender.
 // Valid values are Male/Female/All.
 type Gender struct {
@@ -23,7 +29,7 @@ func (g Gender) String() string {
 	return g.genderType
 }
 
-func FromString(g string) Gender {
+func GenderFromString(g string) Gender {
 	switch g {
 	case Female.genderType:
 		return Female

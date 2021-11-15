@@ -1,13 +1,14 @@
 package assets
 
-type ErrAssetNoID struct {
+type ErrValidation struct {
+	msg string
 }
 
 // Error function.
-func (e ErrAssetNoID) Error() string {
-	return "asset id cannot be empty"
+func (e *ErrValidation) Error() string {
+	return e.msg
 }
 
-func NewAssetNoIDError() *ErrAssetNoID {
-	return &ErrAssetNoID{}
+func NewErrValidation(msg string) *ErrValidation {
+	return &ErrValidation{msg: msg}
 }

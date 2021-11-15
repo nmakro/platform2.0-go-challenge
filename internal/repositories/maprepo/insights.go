@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 )
 
@@ -29,7 +30,8 @@ func (i *InsightRepo) Add(ctx context.Context, insight assets.Insight) error {
 	key := fmt.Sprintf("%d", insight.ID)
 	ok := i.insightConn.Insert(key, insight)
 	if !ok {
-		return NewDuplicateEntryError()
+		errMsg := fmt.Sprintf("asset insight with id: %v already exists", insight.ID)
+		return app.NewDuplicateEntryError(errMsg)
 	}
 	return nil
 }
@@ -37,13 +39,23 @@ func (i *InsightRepo) Add(ctx context.Context, insight assets.Insight) error {
 func (a *InsightRepo) Get(ctx context.Context, insightID uint32) (assets.Insight, error) {
 	key := fmt.Sprintf("%d", insightID)
 	v, err := a.insightConn.Get(key)
-	if err != nil {
-		return assets.Insight{}, err
+	var notFound *ErrNotFound
+
+	switch {
+	case err != nil && errors.As(err, &notFound):
+		errMsg := fmt.Sprintf("asset insight with id: %v was not found", insightID)
+		return assets.Insight{}, app.NewEntityNotFoundError(errMsg)
+	case err != nil && !errors.As(err, &notFound):
+		errMsg := "unknown internal error"
+		return assets.Insight{}, NewInternalRepositoryError(errMsg)
 	}
+
 	if ins, ok := v.(assets.Insight); ok {
 		return ins, nil
 	}
-	return assets.Insight{}, fmt.Errorf("error while reading insight from db.")
+
+	errMsg := fmt.Sprintf("error while reading insight with id: %d from db", insightID)
+	return assets.Insight{}, NewInternalRepositoryError(errMsg)
 }
 
 func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]assets.Insight, error) {
@@ -51,11 +63,11 @@ func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]asset
 	for _, id := range insightIDs {
 		a, err := a.Get(ctx, id)
 		if err != nil {
-			var notFound *ErrEntityNotFound
+			var notFound *app.ErrEntityNotFound
 			if errors.As(err, &notFound) {
 				continue
 			}
-			return []assets.Insight{}, err
+			return []assets.Insight{}, fmt.Errorf("error while reading insights: %w", err)
 		}
 		res = append(res, a)
 	}
@@ -66,7 +78,7 @@ func (i *InsightRepo) Delete(ctx context.Context, insightID uint32) error {
 	key := fmt.Sprintf("%d", insightID)
 	_, exists := i.insightConn.Delete(key)
 	if !exists {
-		return NewEntityNotFoundError()
+		return NewNotFoundError()
 	}
 	return nil
 }
@@ -88,7 +100,8 @@ func (a *InsightRepo) Star(ctx context.Context, userEmail string, insightID uint
 	}
 
 	v, err := a.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
+	var notFound *ErrNotFound
+
 	if err != nil && !errors.As(err, &notFound) {
 		return fmt.Errorf("error while reading starred audiences for user with email: %s", userEmail)
 	}
@@ -111,7 +124,7 @@ func (i *InsightRepo) Unstar(ctx context.Context, userEmail string, insightID ui
 	}
 
 	v, err := i.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
+	var notFound *app.ErrEntityNotFound
 
 	switch {
 	case err != nil && errors.As(err, &notFound):

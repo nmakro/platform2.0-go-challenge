@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 	repo "github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func TestSaveAudienceNoID(t *testing.T) {
 
 	err := audienceRepo.Add(context.Background(), aud)
 
-	expectedErr := assets.NewAssetNoIDError()
+	var expectedErr *assets.ErrValidation
 	assert.ErrorAs(t, err, &expectedErr)
 }
 
@@ -120,7 +121,7 @@ func TestDeleteAudience(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = audienceRepo.Get(context.Background(), aud.ID)
-	var notFound *repo.ErrEntityNotFound
+	var notFound *app.ErrEntityNotFound
 	assert.ErrorAs(t, err, &notFound)
 }
 

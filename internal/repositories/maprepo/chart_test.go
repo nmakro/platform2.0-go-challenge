@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 	repo "github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ func TestSaveChartNoID(t *testing.T) {
 
 	err := chartRepo.Add(context.Background(), chart)
 
-	expectedErr := assets.NewAssetNoIDError()
+	var expectedErr *assets.ErrValidation
 	assert.ErrorAs(t, err, &expectedErr)
 }
 
@@ -113,7 +114,7 @@ func TestDeleteChart(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = chartRepo.Get(context.Background(), chart.ID)
-	var notFound *repo.ErrEntityNotFound
+	var notFound *app.ErrEntityNotFound
 	assert.ErrorAs(t, err, &notFound)
 }
 

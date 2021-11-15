@@ -6,22 +6,22 @@ func (s AssetService) AddInsight(ctx context.Context, i Insight) error {
 	if err := ValidateInsight(i); err != nil {
 		return err
 	}
-	return s.InsightRepo.Add(ctx, i)
+	return s.insightRepo.Add(ctx, i)
 }
 
 func (s AssetService) GetInsight(ctx context.Context, insightID uint32) (Insight, error) {
-	return s.InsightRepo.Get(ctx, insightID)
+	return s.insightRepo.Get(ctx, insightID)
 }
 
 func (s AssetService) DeleteInsight(ctx context.Context, insightID uint32) error {
-	return s.InsightRepo.Delete(ctx, insightID)
+	return s.insightRepo.Delete(ctx, insightID)
 }
 
 func (s AssetService) UpdateInsight(ctx context.Context, insight Insight) error {
 	if err := ValidateInsight(insight); err != nil {
 		return err
 	}
-	return s.InsightRepo.Update(ctx, insight)
+	return s.insightRepo.Update(ctx, insight)
 }
 
 func (s AssetService) StartInsight(ctx context.Context, userEmail string, insightID uint32) error {
@@ -29,11 +29,11 @@ func (s AssetService) StartInsight(ctx context.Context, userEmail string, insigh
 	if err != nil {
 		return err
 	}
-	return s.InsightRepo.Star(ctx, userEmail, insightID)
+	return s.insightRepo.Star(ctx, userEmail, insightID)
 }
 
 func (s AssetService) UnstarInsight(ctx context.Context, userEmail string, insightID uint32) error {
-	return s.InsightRepo.Unstar(ctx, userEmail, insightID)
+	return s.insightRepo.Unstar(ctx, userEmail, insightID)
 }
 
 func (s AssetService) GetInsightsForUser(ctx context.Context, userEmail string) ([]Insight, error) {
@@ -42,13 +42,13 @@ func (s AssetService) GetInsightsForUser(ctx context.Context, userEmail string) 
 		return []Insight{}, err
 	}
 
-	ids, err := s.InsightRepo.GetStarredIDsForUser(ctx, userEmail)
+	ids, err := s.insightRepo.GetStarredIDsForUser(ctx, userEmail)
 
 	if err != nil {
 		return []Insight{}, err
 	}
 
-	insights, err := s.InsightRepo.GetMany(ctx, ids)
+	insights, err := s.insightRepo.GetMany(ctx, ids)
 
 	if err != nil {
 		return []Insight{}, err
@@ -61,7 +61,7 @@ type insightValidator = func(i Insight) error
 
 func ValidateInsightID(i Insight) error {
 	if i.ID == 0 {
-		return NewAssetNoIDError()
+		return NewErrValidation("insight id cannot be empty")
 	}
 	return nil
 }

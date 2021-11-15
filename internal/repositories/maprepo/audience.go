@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 )
 
@@ -29,7 +30,8 @@ func (a *AudienceRepo) Add(ctx context.Context, audience assets.Audience) error 
 	key := fmt.Sprintf("%d", audience.ID)
 	ok := a.audConn.Insert(key, audience)
 	if !ok {
-		return NewDuplicateEntryError()
+		errMsg := fmt.Sprintf("asset audience with id: %v already exists", audience.ID)
+		return app.NewDuplicateEntryError(errMsg)
 	}
 	return nil
 }
@@ -37,13 +39,23 @@ func (a *AudienceRepo) Add(ctx context.Context, audience assets.Audience) error 
 func (a *AudienceRepo) Get(ctx context.Context, audienceID uint32) (assets.Audience, error) {
 	key := fmt.Sprintf("%d", audienceID)
 	v, err := a.audConn.Get(key)
-	if err != nil {
-		return assets.Audience{}, err
+	var notFound *ErrNotFound
+
+	switch {
+	case err != nil && errors.As(err, &notFound):
+		errMsg := fmt.Sprintf("asset audience with id: %v was not found", audienceID)
+		return assets.Audience{}, app.NewEntityNotFoundError(errMsg)
+	case err != nil && !errors.As(err, &notFound):
+		errMsg := "unknown internal error"
+		return assets.Audience{}, NewInternalRepositoryError(errMsg)
 	}
+
 	if aud, ok := v.(assets.Audience); ok {
 		return aud, nil
 	}
-	return assets.Audience{}, fmt.Errorf("error while reading audience from db.")
+
+	errMsg := fmt.Sprintf("error while reading audience with id: %d from db", audienceID)
+	return assets.Audience{}, NewInternalRepositoryError(errMsg)
 }
 
 func (a *AudienceRepo) GetMany(ctx context.Context, audienceIDs []uint32) ([]assets.Audience, error) {
@@ -51,11 +63,11 @@ func (a *AudienceRepo) GetMany(ctx context.Context, audienceIDs []uint32) ([]ass
 	for _, id := range audienceIDs {
 		a, err := a.Get(ctx, id)
 		if err != nil {
-			var notFound *ErrEntityNotFound
+			var notFound *app.ErrEntityNotFound
 			if errors.As(err, &notFound) {
 				continue
 			}
-			return []assets.Audience{}, err
+			return []assets.Audience{}, fmt.Errorf("error while reading audiences: %w", err)
 		}
 		res = append(res, a)
 	}
@@ -66,7 +78,8 @@ func (a *AudienceRepo) Delete(ctx context.Context, audienceID uint32) error {
 	key := fmt.Sprintf("%d", audienceID)
 	_, exists := a.audConn.Delete(key)
 	if !exists {
-		return NewEntityNotFoundError()
+		errMsg := fmt.Sprintf("asset audience with id: %v does not exist", audienceID)
+		return app.NewEntityNotFoundError(errMsg)
 	}
 	return nil
 }
@@ -88,9 +101,10 @@ func (a *AudienceRepo) Star(ctx context.Context, userEmail string, audienceID ui
 	}
 
 	v, err := a.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
+	var notFound *ErrNotFound
+
 	if err != nil && !errors.As(err, &notFound) {
-		return fmt.Errorf("error while reading starred audiences for user with email: %s", userEmail)
+		return fmt.Errorf("error while reading starred audiences for user with email: %s: %w", userEmail, err)
 	}
 
 	if starred, ok := v.([]uint32); ok {
@@ -111,13 +125,14 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 	}
 
 	v, err := a.starConn.Get(userEmail)
-	notFound := NewEntityNotFoundError()
 
+	var notFound *ErrNotFound
 	switch {
 	case err != nil && errors.As(err, &notFound):
-		return fmt.Errorf("cannot find starred audience assets for user: %s", userEmail)
+		errMsg := fmt.Sprintf("cannot find starred audience assets for user: %s", userEmail)
+		return app.NewEntityNotFoundError(errMsg)
 	case err != nil && !errors.As(err, &notFound): // This Will never evaluate but hypothetically that could be an internal db error.
-		return err
+		return NewInternalRepositoryError(UnknownError)
 	default:
 		if starred, ok := v.([]uint32); ok {
 			found := false

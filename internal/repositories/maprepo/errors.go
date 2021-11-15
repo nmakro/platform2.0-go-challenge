@@ -1,23 +1,31 @@
 package maprepo
 
-type ErrDuplicateEntry struct {
+type ErrNotFound struct {
 }
 
-func NewDuplicateEntryError() *ErrDuplicateEntry {
-	return &ErrDuplicateEntry{}
+func NewNotFoundError() *ErrNotFound {
+	return &ErrNotFound{}
 }
 
-func (e ErrDuplicateEntry) Error() string {
-	return "duplicate entry error"
+func (e ErrNotFound) Error() string {
+	return ""
 }
 
-type ErrEntityNotFound struct {
+type ErrInternalRepository struct {
+	inner error
+	msg   string
 }
 
-func NewEntityNotFoundError() *ErrEntityNotFound {
-	return &ErrEntityNotFound{}
+func NewInternalRepositoryError(msg string) *ErrInternalRepository {
+	return &ErrInternalRepository{msg: msg}
 }
 
-func (e ErrEntityNotFound) Error() string {
-	return "entity not found error"
+func (e ErrInternalRepository) Error() string {
+	return e.msg
 }
+
+func (r *ErrInternalRepository) Unwrap() error {
+	return r.inner
+}
+
+const UnknownError = "unknown internal repository error"

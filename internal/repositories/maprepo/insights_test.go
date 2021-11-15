@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 	repo "github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ func TestSaveInsightNoID(t *testing.T) {
 
 	err := insightRepo.Add(context.Background(), ins)
 
-	expectedErr := assets.NewAssetNoIDError()
+	var expectedErr *assets.ErrValidation
 	assert.ErrorAs(t, err, &expectedErr)
 }
 
@@ -113,7 +114,7 @@ func TestDeleteInsight(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, err = insightRepo.Get(context.Background(), ins.ID)
-	var notFound *repo.ErrEntityNotFound
+	var notFound *app.ErrEntityNotFound
 	assert.ErrorAs(t, err, &notFound)
 }
 

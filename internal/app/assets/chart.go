@@ -6,29 +6,29 @@ func (s AssetService) AddChart(ctx context.Context, c Chart) error {
 	if err := ValidateChart(c); err != nil {
 		return err
 	}
-	return s.ChartRepo.Add(ctx, c)
+	return s.chartRepo.Add(ctx, c)
 }
 
 func (s AssetService) UpdateChart(ctx context.Context, c Chart) error {
 	if err := ValidateChart(c); err != nil {
 		return err
 	}
-	return s.ChartRepo.Update(ctx, c)
+	return s.chartRepo.Update(ctx, c)
 }
 
 func (s AssetService) GetChart(ctx context.Context, chartID uint32) (Chart, error) {
-	return s.ChartRepo.Get(ctx, chartID)
+	return s.chartRepo.Get(ctx, chartID)
 }
 
 func (s AssetService) DeleteChart(ctx context.Context, chartID uint32) error {
-	return s.ChartRepo.Delete(ctx, chartID)
+	return s.chartRepo.Delete(ctx, chartID)
 }
 
 func (s AssetService) StarChart(ctx context.Context, userEmail string, chartID uint32) error {
 	if _, err := s.userService.GetUser(ctx, userEmail); err != nil {
 		return err
 	}
-	return s.ChartRepo.Star(ctx, userEmail, chartID)
+	return s.chartRepo.Star(ctx, userEmail, chartID)
 }
 
 func (s AssetService) GetChartsForUser(ctx context.Context, userEmail string) ([]Chart, error) {
@@ -37,13 +37,13 @@ func (s AssetService) GetChartsForUser(ctx context.Context, userEmail string) ([
 		return []Chart{}, err
 	}
 
-	ids, err := s.ChartRepo.GetStarredIDsForUser(ctx, userEmail)
+	ids, err := s.chartRepo.GetStarredIDsForUser(ctx, userEmail)
 
 	if err != nil {
 		return []Chart{}, err
 	}
 
-	charts, err := s.ChartRepo.GetMany(ctx, ids)
+	charts, err := s.chartRepo.GetMany(ctx, ids)
 
 	if err != nil {
 		return []Chart{}, err
@@ -53,14 +53,14 @@ func (s AssetService) GetChartsForUser(ctx context.Context, userEmail string) ([
 }
 
 func (s AssetService) UnstarChart(ctx context.Context, userEmail string, chartID uint32) error {
-	return s.ChartRepo.Unstar(ctx, userEmail, chartID)
+	return s.chartRepo.Unstar(ctx, userEmail, chartID)
 }
 
 type chartValidator = func(c Chart) error
 
 func ValidateChartID(c Chart) error {
 	if c.ID == 0 {
-		return NewAssetNoIDError()
+		return NewErrValidation("chart id cannot be empty")
 	}
 	return nil
 }
