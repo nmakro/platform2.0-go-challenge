@@ -2,8 +2,10 @@ package maprepo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/user"
 )
 
@@ -33,12 +35,19 @@ func (u *UserDBRepo) GetByEmail(ctx context.Context, email string) (user.User, e
 	res, err := u.conn.Get(email)
 
 	if err != nil {
-		return user.User{}, err
+		var notFound *ErrNotFound
+		if errors.As(err, &notFound) {
+			errMsg := fmt.Sprintf("user with email: %s not found", email)
+			return user.User{}, app.NewEntityNotFoundError(errMsg)
+		}
+		errMsg := fmt.Sprintf("unknown internal errow while getting user with email: %s", email)
+		return user.User{}, NewInternalRepositoryError(errMsg)
 	}
 
 	v, ok := res.(user.User)
 	if !ok {
-		return user.User{}, fmt.Errorf("error in get user, read unexpected value %v", res)
+		errMsg := fmt.Sprintf("unknown internal errow while reading user with email: %s", email)
+		return user.User{}, NewInternalRepositoryError(errMsg)
 	}
 	return v, nil
 }

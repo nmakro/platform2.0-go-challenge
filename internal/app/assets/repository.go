@@ -7,6 +7,7 @@ type AudienceRepository interface {
 	Update(ctx context.Context, a Audience) error
 	Get(ctx context.Context, AudienceID uint32) (Audience, error)
 	GetMany(ctx context.Context, AudienceIDs []uint32) ([]Audience, error)
+	List(ctx context.Context) ([]Audience, error)
 	Delete(ctx context.Context, AudienceID uint32) error
 	Star(ctx context.Context, userEmail string, audienceID uint32) error
 	Unstar(ctx context.Context, userEmail string, audienceID uint32) error

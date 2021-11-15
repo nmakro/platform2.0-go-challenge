@@ -74,6 +74,30 @@ func (a *AudienceRepo) GetMany(ctx context.Context, audienceIDs []uint32) ([]ass
 	return res, nil
 }
 
+func (a *AudienceRepo) List(ctx context.Context) ([]assets.Audience, error) {
+	keys := a.audConn.Keys()
+	res := make([]assets.Audience, 0, len(keys))
+	var notFound *ErrNotFound
+	for i := 0; i < len(keys); i++ {
+		v, err := a.audConn.Get(keys[i])
+		if err != nil {
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Audience{}, fmt.Errorf("error while reading audiences: %w", err)
+		}
+
+		aud, ok := v.(assets.Audience)
+		if !ok {
+			errMsg := fmt.Sprintf("error while reading audience with id: %s from db", keys[i])
+			return []assets.Audience{}, NewInternalRepositoryError(errMsg)
+
+		}
+		res = append(res, aud)
+	}
+	return res, nil
+}
+
 func (a *AudienceRepo) Delete(ctx context.Context, audienceID uint32) error {
 	key := fmt.Sprintf("%d", audienceID)
 	_, exists := a.audConn.Delete(key)
@@ -104,10 +128,16 @@ func (a *AudienceRepo) Star(ctx context.Context, userEmail string, audienceID ui
 	var notFound *ErrNotFound
 
 	if err != nil && !errors.As(err, &notFound) {
-		return fmt.Errorf("error while reading starred audiences for user with email: %s: %w", userEmail, err)
+		errMsg := fmt.Sprintf("error while reading starred audiences for user with email: %s:", userEmail)
+		return NewInternalRepositoryError(errMsg)
 	}
 
 	if starred, ok := v.([]uint32); ok {
+		for i := range starred {
+			if audienceID == starred[i] {
+				return nil
+			}
+		}
 		starred = append(starred, audienceID)
 		a.starConn.Upsert(userEmail, starred)
 	} else {
@@ -149,7 +179,8 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 			}
 		}
 	}
-	return fmt.Errorf("cannot find starred audience asset: %v for user: %s", audienceID, userEmail)
+	errMsg := fmt.Sprintf("cannot find starred audience assets for user: %s", userEmail)
+	return app.NewEntityNotFoundError(errMsg)
 }
 
 func (a *AudienceRepo) GetStarredIDsForUser(ctx context.Context, userEmail string) ([]uint32, error) {

@@ -1,93 +1,52 @@
 package assets
 
 import (
-	"errors"
+	"log"
 	"net/http"
+	"os"
 
-	"github.com/nmakro/platform2.0-go-challenge/internal/app"
+	"github.com/gorilla/mux"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 	gwihttp "github.com/nmakro/platform2.0-go-challenge/pkg/http"
 )
 
 type AssetsModule struct {
-	service assets.AssetService
+	service *assets.AssetService
 }
 
-func (m *AssetsModule) AddAudience(w http.ResponseWriter, r *http.Request) {
-	req := assets.AddAudienceCommand{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+func Setup(router *mux.Router, service *assets.AssetService) {
+	m := &AssetsModule{
+		service: service,
 	}
 
-	if err := m.service.AddAudience(r.Context(), req.BuildFromCmd()); err != nil {
-		var duplicateErr *app.ErrDuplicateEntry
-		if errors.As(err, &duplicateErr) {
-			gwihttp.ResponseWithJSON(http.StatusConflict, map[string]interface{}{"error": err.Error()}, w)
-			return
-		}
+	assets := router.PathPrefix("/assets").Subrouter()
+	assets.HandleFunc("/", m.ListAssets).Methods("GET")
 
-		var validationErr *assets.ErrValidation
-		if errors.As(err, &validationErr) {
-			gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()}, w)
-			return
-		}
+	audiences := assets.PathPrefix("/audiences").Subrouter()
+	audiences.HandleFunc("/", m.ListAudience).Methods("GET")
+	audiences.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
+	audiences.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("DELETE")
+	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
+	audiences.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
 
+	// charts := assets.PathPrefix("/charts").Subrouter()
+	// charts.HandleFunc("/", m.ListAudience).Methods("GET")
+	// charts.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
+	// charts.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("GET")
+	// charts.HandleFunc("/audience", m.UpdateAudience).Methods("PUT")
+	// charts.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
+
+}
+
+func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
+	logger := log.New(os.Stdout, "http layer", log.LstdFlags)
+	logger.Println("in handler")
+	audiences, err := m.service.GetAllAudienceAssets(r.Context())
+
+	if err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
 
-	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
-}
-
-type DeleteAudienceRequest struct {
-	AudienceID uint32 `json:"audience_id"`
-}
-
-func (m *AssetsModule) DeleteAudience(w http.ResponseWriter, r *http.Request) {
-	req := DeleteAudienceRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if err := m.service.DeleteAudience(r.Context(), req.AudienceID); err != nil {
-		var notFound *app.ErrEntityNotFound
-		if errors.As(err, &notFound) {
-			gwihttp.ResponseWithJSON(http.StatusNoContent, nil, w)
-			return
-		}
-
-		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
-		return
-	}
-
-	gwihttp.ResponseWithJSON(http.StatusNoContent, nil, w)
-}
-
-func (m *AssetsModule) UpdateAudience(w http.ResponseWriter, r *http.Request) {
-	req := assets.UpdateAudienceCommand{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if err := m.service.UpdateAudience(r.Context(), req.BuildFromCmd()); err != nil {
-		var notFound *app.ErrEntityNotFound
-		if errors.As(err, &notFound) {
-			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)
-			return
-		}
-
-		var validationErr *assets.ErrValidation
-		if errors.As(err, &validationErr) {
-			gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()}, w)
-			return
-		}
-
-		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
-		return
-	}
-
-	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
+	gwihttp.ResponseWithJSON(http.StatusOK, audiences, w)
 }

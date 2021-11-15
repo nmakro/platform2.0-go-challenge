@@ -17,34 +17,40 @@ func (s AssetService) GetAudience(ctx context.Context, audienceID uint32) (Audie
 	return s.audienceRepo.Get(ctx, audienceID)
 }
 
-func (s AssetService) UpdateAudience(ctx context.Context, a Audience) error {
-	old, err := s.GetAudience(ctx, a.ID)
+func (s AssetService) GetAllAudienceAssets(ctx context.Context) ([]Audience, error) {
+	return s.audienceRepo.List(ctx)
+}
+
+func (s AssetService) UpdateAudience(ctx context.Context, audienceID uint32, a UpdateAudienceCommand) error {
+	old, err := s.GetAudience(ctx, audienceID)
 	if err != nil {
 		return err
 	}
 
-	if a.Description != "" {
-		old.Description = a.Description
+	if a.Description != nil {
+		old.Description = *a.Description
 	}
 
-	if a.BirthCountry != "" {
-		old.BirthCountry = a.BirthCountry
+	if a.BirthCountry != nil {
+		old.BirthCountry = *a.BirthCountry
 	}
 
-	if a.Gender != Unknown {
-		old.Gender = a.Gender
+	if a.Gender != nil {
+		gender := GenderFromString(*a.Gender)
+		old.Gender = gender
 	}
 
-	if a.NumOfPurchases != 0 {
-		old.NumOfPurchases = a.NumOfPurchases
+	if a.NumOfPurchases != nil {
+		old.NumOfPurchases = *a.NumOfPurchases
 	}
 
-	if a.SocialMediaHours != 0 {
-		old.SocialMediaHours = a.SocialMediaHours
+	if a.SocialMediaHours != nil {
+		old.SocialMediaHours = *a.SocialMediaHours
 	}
 
-	if a.AgeGroup.EndYear != 0 && a.AgeGroup.StartYear != 0 {
-		old.AgeGroup = a.AgeGroup
+	if a.AgeGroupTo != nil && a.AgeGroupFrom != nil {
+
+		old.AgeGroup = NewAgeGroup(*a.AgeGroupFrom, *a.AgeGroupTo)
 	}
 
 	if err := ValidateAudience(old); err != nil {

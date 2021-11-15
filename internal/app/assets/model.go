@@ -1,12 +1,14 @@
 package assets
 
+import "fmt"
+
 //Assets value structs
 
 // AgeGroup represents an age group.
 // A valid AgeGroup must have StartAge less than EndYear and StartYear > 18 and EndYear < 100.
 type AgeGroup struct {
-	StartYear uint32
-	EndYear   uint32
+	StartYear uint32 `json:"start_year"`
+	EndYear   uint32 `json:"end_year"`
 }
 
 func (a AgeGroup) IsValid() bool {
@@ -14,6 +16,7 @@ func (a AgeGroup) IsValid() bool {
 }
 
 func NewAgeGroup(from, to uint32) AgeGroup {
+	fmt.Println("in new")
 	return AgeGroup{
 		StartYear: from,
 		EndYear:   to}
@@ -52,40 +55,40 @@ var (
 // DataPoint represents a Chart Data value.
 // An instance of a DataPoint has a XAxis e.x year/month etc and a YAxis e.x. HoursSpent or NumOfPurchases.
 type DataPoint struct {
-	XValue interface{}
-	YValue interface{}
-	Data   []byte
+	XValue interface{} `json:"xaxis_value"`
+	YValue interface{} `json:"yaxis_value"`
+	Data   []byte      `json:"data"`
 }
 
 // Assets entity structs.
 
 // Audience struct represents an Audience entity.
 type Audience struct {
-	ID               uint32
-	SocialMediaHours uint32
-	NumOfPurchases   uint32
-	AgeGroup         AgeGroup
-	Gender           Gender
-	BirthCountry     string
-	Description      string
+	ID               uint32   `json:"id"`
+	SocialMediaHours uint32   `json:"social_media_hours"`
+	NumOfPurchases   uint32   `json:"num_of_purchases"`
+	AgeGroup         AgeGroup `json:"age_group"`
+	Gender           Gender   `json:"gender"`
+	BirthCountry     string   `json:"birth_country"`
+	Description      string   `json:"description"`
 }
 
 // Insight struct represents an Insight entity.
 type Insight struct {
-	ID          uint32
-	Topic       string
-	Text        string
-	Description string
+	ID          uint32 `json:"id"`
+	Topic       string `json:"topic"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
 }
 
 // Chart struct represents a Chart entity.
 type Chart struct {
-	ID          uint32
-	Title       string
-	XAxis       string
-	YAxis       string
-	Description string
-	Data        []DataPoint
+	ID          uint32      `json:"id"`
+	Title       string      `json:"title"`
+	XAxis       string      `json:"xaxis"`
+	YAxis       string      `json:"yaxis"`
+	Description string      `json:"description"`
+	Data        []DataPoint `json:"data_point"`
 }
 
 type Asset struct {

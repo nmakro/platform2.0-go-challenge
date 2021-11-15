@@ -48,6 +48,14 @@ func (c *Client) Delete(key string) (interface{}, bool) {
 	return nil, false
 }
 
+func (c *Client) CountAll() int {
+	return c.dbMap.Count()
+}
+
+func (c *Client) Keys() []string {
+	return c.dbMap.Keys()
+}
+
 func (c *Client) ClearAll() {
 	c.dbMap.Clear()
 }
