@@ -49,7 +49,7 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	insights.HandleFunc("/insight/{id}", m.UpdateInsight).Methods("PATCH")
 	insights.HandleFunc("/insight", m.AddInsight).Methods("POST")
 
-	stars := router.PathPrefix("starred-assets").Subrouter()
+	stars := router.PathPrefix("/starred-assets").Subrouter()
 	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")
 	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
 	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
