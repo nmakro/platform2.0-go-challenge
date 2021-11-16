@@ -56,7 +56,7 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
 	stars.HandleFunc("/insight{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 	stars.HandleFunc("/chart{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/charts{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/chart{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
