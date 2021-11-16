@@ -76,6 +76,30 @@ func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Ch
 	return res, nil
 }
 
+func (c *ChartRepo) List(ctx context.Context) ([]assets.Chart, error) {
+	keys := c.chartConn.Keys()
+	res := make([]assets.Chart, 0, len(keys))
+	var notFound *ErrNotFound
+	for i := 0; i < len(keys); i++ {
+		v, err := c.chartConn.Get(keys[i])
+		if err != nil {
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Chart{}, fmt.Errorf("error while reading charts: %w", err)
+		}
+
+		aud, ok := v.(assets.Chart)
+		if !ok {
+			errMsg := fmt.Sprintf("error while reading chart with id: %s from db", keys[i])
+			return []assets.Chart{}, NewInternalRepositoryError(errMsg)
+
+		}
+		res = append(res, aud)
+	}
+	return res, nil
+}
+
 func (a *ChartRepo) Delete(ctx context.Context, chartID uint32) error {
 	key := fmt.Sprintf("%d", chartID)
 	_, exists := a.chartConn.Delete(key)

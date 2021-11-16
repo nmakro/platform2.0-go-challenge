@@ -74,6 +74,30 @@ func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]asset
 	return res, nil
 }
 
+func (a *InsightRepo) List(ctx context.Context) ([]assets.Insight, error) {
+	keys := a.insightConn.Keys()
+	res := make([]assets.Insight, 0, len(keys))
+	var notFound *ErrNotFound
+	for i := 0; i < len(keys); i++ {
+		v, err := a.insightConn.Get(keys[i])
+		if err != nil {
+			if errors.As(err, &notFound) {
+				continue
+			}
+			return []assets.Insight{}, fmt.Errorf("error while reading insights: %w", err)
+		}
+
+		aud, ok := v.(assets.Insight)
+		if !ok {
+			errMsg := fmt.Sprintf("error while reading insight with id: %s from db", keys[i])
+			return []assets.Insight{}, NewInternalRepositoryError(errMsg)
+
+		}
+		res = append(res, aud)
+	}
+	return res, nil
+}
+
 func (i *InsightRepo) Delete(ctx context.Context, insightID uint32) error {
 	key := fmt.Sprintf("%d", insightID)
 	_, exists := i.insightConn.Delete(key)

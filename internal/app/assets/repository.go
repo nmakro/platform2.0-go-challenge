@@ -19,6 +19,7 @@ type ChartRepository interface {
 	Update(ctx context.Context, c Chart) error
 	Get(ctx context.Context, ChartID uint32) (Chart, error)
 	GetMany(ctx context.Context, ChartIDs []uint32) ([]Chart, error)
+	List(ctx context.Context) ([]Chart, error)
 	Delete(ctx context.Context, ChartID uint32) error
 	Star(ctx context.Context, UserEmail string, ChartID uint32) error
 	Unstar(ctx context.Context, UserEmail string, ChartID uint32) error
@@ -30,6 +31,7 @@ type InsightRepository interface {
 	Update(ctx context.Context, i Insight) error
 	Get(ctx context.Context, insightID uint32) (Insight, error)
 	GetMany(ctx context.Context, insightIDs []uint32) ([]Insight, error)
+	List(ctx context.Context) ([]Insight, error)
 	Delete(ctx context.Context, insightID uint32) error
 	Star(ctx context.Context, userEmail string, insightID uint32) error
 	Unstar(ctx context.Context, userEmail string, insightID uint32) error

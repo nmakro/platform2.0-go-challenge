@@ -1,9 +1,7 @@
 package assets
 
 import (
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
@@ -29,8 +27,8 @@ func Setup(router *mux.Router, service *assets.AssetService) {
 	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
 	audiences.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
 
-	// charts := assets.PathPrefix("/charts").Subrouter()
-	// charts.HandleFunc("/", m.ListAudience).Methods("GET")
+	//charts := assets.PathPrefix("/charts").Subrouter()
+	//charts.HandleFunc("/", m.Li).Methods("GET")
 	// charts.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
 	// charts.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("GET")
 	// charts.HandleFunc("/audience", m.UpdateAudience).Methods("PUT")
@@ -39,8 +37,6 @@ func Setup(router *mux.Router, service *assets.AssetService) {
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
-	logger := log.New(os.Stdout, "http layer", log.LstdFlags)
-	logger.Println("in handler")
 	audiences, err := m.service.GetAllAudienceAssets(r.Context())
 
 	if err != nil {
