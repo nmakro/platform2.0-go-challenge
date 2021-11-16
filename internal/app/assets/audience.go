@@ -17,7 +17,7 @@ func (s AssetService) GetAudience(ctx context.Context, audienceID uint32) (Audie
 	return s.audienceRepo.Get(ctx, audienceID)
 }
 
-func (s AssetService) GetAllAudienceAssets(ctx context.Context) ([]Audience, error) {
+func (s AssetService) ListAudienceAssets(ctx context.Context) ([]Audience, error) {
 	return s.audienceRepo.List(ctx)
 }
 

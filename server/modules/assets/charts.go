@@ -144,7 +144,7 @@ func (m *AssetsModule) ListCharts(w http.ResponseWriter, r *http.Request) {
 		err      error
 	)
 
-	if response, err = m.service.GetAllCharts(r.Context()); err != nil {
+	if response, err = m.service.ListChartAssets(r.Context()); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}

@@ -13,15 +13,36 @@ func (s AssetService) GetInsight(ctx context.Context, insightID uint32) (Insight
 	return s.insightRepo.Get(ctx, insightID)
 }
 
+func (s AssetService) ListInsightAssets(ctx context.Context) ([]Insight, error) {
+	return s.insightRepo.List(ctx)
+}
+
 func (s AssetService) DeleteInsight(ctx context.Context, insightID uint32) error {
 	return s.insightRepo.Delete(ctx, insightID)
 }
 
-func (s AssetService) UpdateInsight(ctx context.Context, insight Insight) error {
-	if err := ValidateInsight(insight); err != nil {
+func (s AssetService) UpdateInsight(ctx context.Context, insightID uint32, insight UpdateInsightCommand) error {
+	old, err := s.GetInsight(ctx, insightID)
+	if err != nil {
 		return err
 	}
-	return s.insightRepo.Update(ctx, insight)
+
+	if insight.Description != nil {
+		old.Description = *insight.Description
+	}
+
+	if insight.Text != nil {
+		old.Text = *insight.Text
+	}
+
+	if insight.Topic != nil {
+		old.Topic = *insight.Topic
+	}
+
+	if err := ValidateInsight(old); err != nil {
+		return err
+	}
+	return s.insightRepo.Update(ctx, old)
 }
 
 func (s AssetService) StartInsight(ctx context.Context, userEmail string, insightID uint32) error {

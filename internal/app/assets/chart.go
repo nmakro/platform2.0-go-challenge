@@ -45,7 +45,7 @@ func (s AssetService) GetChart(ctx context.Context, chartID uint32) (Chart, erro
 	return s.chartRepo.Get(ctx, chartID)
 }
 
-func (s AssetService) GetAllCharts(ctx context.Context) ([]Chart, error) {
+func (s AssetService) ListChartAssets(ctx context.Context) ([]Chart, error) {
 	return s.chartRepo.List(ctx)
 }
 

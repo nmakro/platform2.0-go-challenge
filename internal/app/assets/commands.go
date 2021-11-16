@@ -74,3 +74,25 @@ type UpdateChartCommand struct {
 	Description *string      `json:"description"`
 	Data        *[]DataPoint `json:"data_point"`
 }
+
+type AddInsightCommand struct {
+	Topic       string `json:"topic"`
+	Text        string `json:"text"`
+	Description string `json:"description"`
+}
+
+func (a *AddInsightCommand) BuildFromCmd() Insight {
+	insight := Insight{
+		ID:          atomic.AddUint32(&ChartIndex, 1),
+		Topic:       a.Topic,
+		Text:        a.Text,
+		Description: a.Description,
+	}
+	return insight
+}
+
+type UpdateInsightCommand struct {
+	Topic       *string `json:"topic"`
+	Text        *string `json:"text"`
+	Description *string `json:"description"`
+}

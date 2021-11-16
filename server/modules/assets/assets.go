@@ -20,24 +20,33 @@ func Setup(router *mux.Router, service *assets.AssetService) {
 	assets := router.PathPrefix("/assets").Subrouter()
 	assets.HandleFunc("/", m.ListAssets).Methods("GET")
 
+	// Register audience routers.
 	audiences := assets.PathPrefix("/audiences").Subrouter()
 	audiences.HandleFunc("/", m.ListAudience).Methods("GET")
 	audiences.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
 	audiences.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("DELETE")
-	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
 	audiences.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
+	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
 
-	//charts := assets.PathPrefix("/charts").Subrouter()
-	//charts.HandleFunc("/", m.Li).Methods("GET")
-	// charts.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
-	// charts.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("GET")
-	// charts.HandleFunc("/audience", m.UpdateAudience).Methods("PUT")
-	// charts.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
+	// Register charts routers.
+	charts := assets.PathPrefix("/charts").Subrouter()
+	charts.HandleFunc("/", m.ListCharts).Methods("GET")
+	charts.HandleFunc("/chart/{id}", m.GetChart).Methods("GET")
+	charts.HandleFunc("/chart/{id}", m.DeleteChart).Methods("DELETE")
+	charts.HandleFunc("/chart/{id}", m.UpdateChart).Methods("PATCH")
+	charts.HandleFunc("/chart", m.AddChart).Methods("PUT")
+
+	insights := assets.PathPrefix("/insights").Subrouter()
+	insights.HandleFunc("/", m.ListInsights).Methods("GET")
+	insights.HandleFunc("/insight/{id}", m.GetInsight).Methods("GET")
+	insights.HandleFunc("/insight/{id}", m.DeleteInsight).Methods("DELETE")
+	insights.HandleFunc("/insight/{id}", m.UpdateInsight).Methods("PATCH")
+	insights.HandleFunc("/insight", m.AddInsight).Methods("PUT")
 
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
-	audiences, err := m.service.GetAllAudienceAssets(r.Context())
+	audiences, err := m.service.ListAudienceAssets(r.Context())
 
 	if err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)

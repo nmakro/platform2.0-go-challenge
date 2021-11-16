@@ -2,7 +2,6 @@ package assets
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,14 +11,14 @@ import (
 	gwihttp "github.com/nmakro/platform2.0-go-challenge/pkg/http"
 )
 
-func (m *AssetsModule) AddAudience(w http.ResponseWriter, r *http.Request) {
-	req := assets.AddAudienceCommand{}
+func (m *AssetsModule) AddInsight(w http.ResponseWriter, r *http.Request) {
+	req := assets.AddInsightCommand{}
 	if err := gwihttp.ValidateRequest(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := m.service.AddAudience(r.Context(), req.BuildFromCmd()); err != nil {
+	if err := m.service.AddInsight(r.Context(), req.BuildFromCmd()); err != nil {
 		var duplicateErr *app.ErrDuplicateEntry
 		if errors.As(err, &duplicateErr) {
 			gwihttp.ResponseWithJSON(http.StatusConflict, map[string]interface{}{"error": err.Error()}, w)
@@ -39,25 +38,21 @@ func (m *AssetsModule) AddAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type DeleteAudienceRequest struct {
-	AudienceID uint32 `json:"audience_id"`
-}
-
-func (m *AssetsModule) DeleteAudience(w http.ResponseWriter, r *http.Request) {
+func (m *AssetsModule) DeleteInsight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	audienceID, ok := vars["id"]
+	insightID, ok := vars["id"]
 	if !ok {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an insight id"}, w)
 		return
 	}
 
-	id, err := strconv.Atoi(audienceID)
+	id, err := strconv.Atoi(insightID)
 	if err != nil {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "insight id must be a uint"}, w)
 		return
 	}
 
-	if err := m.service.DeleteAudience(r.Context(), uint32(id)); err != nil {
+	if err := m.service.DeleteInsight(r.Context(), uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, &notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNoContent, nil, w)
@@ -71,27 +66,27 @@ func (m *AssetsModule) DeleteAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusNoContent, nil, w)
 }
 
-func (m *AssetsModule) UpdateAudience(w http.ResponseWriter, r *http.Request) {
+func (m *AssetsModule) UpdateInsight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	audienceID, ok := vars["id"]
+	insightID, ok := vars["id"]
 	if !ok {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an insight id"}, w)
 		return
 	}
 
-	id, err := strconv.Atoi(audienceID)
+	id, err := strconv.Atoi(insightID)
 	if err != nil {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "insight id must be a uint"}, w)
 		return
 	}
 
-	req := assets.UpdateAudienceCommand{}
+	req := assets.UpdateInsightCommand{}
 	if err := gwihttp.ValidateRequest(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := m.service.UpdateAudience(r.Context(), uint32(id), req); err != nil {
+	if err := m.service.UpdateInsight(r.Context(), uint32(id), req); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, &notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)
@@ -111,32 +106,27 @@ func (m *AssetsModule) UpdateAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type GetAudienceRequest struct {
-	AudienceID uint32 `json:"id"`
-}
-
-func (m *AssetsModule) GetAudience(w http.ResponseWriter, r *http.Request) {
+func (m *AssetsModule) GetInsight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	audienceID, ok := vars["id"]
+	insightID, ok := vars["id"]
 	if !ok {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an insight id"}, w)
 		return
 	}
 
-	id, err := strconv.Atoi(audienceID)
+	id, err := strconv.Atoi(insightID)
 	if err != nil {
-		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "insight id must be a uint"}, w)
 		return
 	}
 
 	var (
-		response assets.Audience
+		response assets.Insight
 	)
 
-	if response, err = m.service.GetAudience(r.Context(), uint32(id)); err != nil {
+	if response, err = m.service.GetInsight(r.Context(), uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, &notFound) {
-			fmt.Println("not found!!!!")
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)
 			return
 		}
@@ -148,13 +138,13 @@ func (m *AssetsModule) GetAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, response, w)
 }
 
-func (m *AssetsModule) ListAudience(w http.ResponseWriter, r *http.Request) {
+func (m *AssetsModule) ListInsights(w http.ResponseWriter, r *http.Request) {
 	var (
-		response []assets.Audience
+		response []assets.Insight
 		err      error
 	)
 
-	if response, err = m.service.ListAudienceAssets(r.Context()); err != nil {
+	if response, err = m.service.ListInsightAssets(r.Context()); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
@@ -162,19 +152,19 @@ func (m *AssetsModule) ListAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, response, w)
 }
 
-type StarAudienceRequest struct {
-	UserEmail  string `json:"user_email"`
-	AudienceID uint32 `json:"audience_id"`
+type StarInsightRequest struct {
+	UserEmail string `json:"user_email"`
+	InsightID uint32 `json:"insight_id"`
 }
 
-func (m *AssetsModule) StarAudience(w http.ResponseWriter, r *http.Request) {
-	req := StarAudienceRequest{}
+func (m *AssetsModule) StarInsight(w http.ResponseWriter, r *http.Request) {
+	req := StarInsightRequest{}
 	if err := gwihttp.ValidateRequest(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := m.service.StarAudience(r.Context(), req.UserEmail, req.AudienceID); err != nil {
+	if err := m.service.StartInsight(r.Context(), req.UserEmail, req.InsightID); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
@@ -182,19 +172,19 @@ func (m *AssetsModule) StarAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type UnStarAudienceRequest struct {
-	UserEmail  string `json:"user_email"`
-	AudienceID uint32 `json:"audience_id"`
+type UnStarInsightRequest struct {
+	UserEmail string `json:"user_email"`
+	InsightID uint32 `json:"insight_id"`
 }
 
-func (m *AssetsModule) UnStarAudience(w http.ResponseWriter, r *http.Request) {
-	req := UnStarAudienceRequest{}
+func (m *AssetsModule) UnStarInsight(w http.ResponseWriter, r *http.Request) {
+	req := UnStarInsightRequest{}
 	if err := gwihttp.ValidateRequest(r, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if err := m.service.UnstarAudience(r.Context(), req.UserEmail, req.AudienceID); err != nil {
+	if err := m.service.UnstarInsight(r.Context(), req.UserEmail, req.InsightID); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)
