@@ -47,7 +47,6 @@ var (
 )
 
 type AddChartCommand struct {
-	ID          uint32      `json:"id"`
 	Title       string      `json:"title"`
 	XAxis       string      `json:"xaxis"`
 	YAxis       string      `json:"yaxis"`
