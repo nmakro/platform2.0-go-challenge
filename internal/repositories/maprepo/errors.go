@@ -16,8 +16,8 @@ type ErrInternalRepository struct {
 	msg   string
 }
 
-func NewInternalRepositoryError(msg string) *ErrInternalRepository {
-	return &ErrInternalRepository{msg: msg}
+func NewInternalRepositoryError(msg string, inner error) *ErrInternalRepository {
+	return &ErrInternalRepository{msg: msg, inner: inner}
 }
 
 func (e ErrInternalRepository) Error() string {

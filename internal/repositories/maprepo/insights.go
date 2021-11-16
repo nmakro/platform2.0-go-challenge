@@ -47,7 +47,7 @@ func (a *InsightRepo) Get(ctx context.Context, insightID uint32) (assets.Insight
 		return assets.Insight{}, app.NewEntityNotFoundError(errMsg)
 	case err != nil && !errors.As(err, &notFound):
 		errMsg := "unknown internal error"
-		return assets.Insight{}, NewInternalRepositoryError(errMsg)
+		return assets.Insight{}, NewInternalRepositoryError(errMsg, nil)
 	}
 
 	if ins, ok := v.(assets.Insight); ok {
@@ -55,7 +55,7 @@ func (a *InsightRepo) Get(ctx context.Context, insightID uint32) (assets.Insight
 	}
 
 	errMsg := fmt.Sprintf("error while reading insight with id: %d from db", insightID)
-	return assets.Insight{}, NewInternalRepositoryError(errMsg)
+	return assets.Insight{}, NewInternalRepositoryError(errMsg, nil)
 }
 
 func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]assets.Insight, error) {
@@ -90,7 +90,7 @@ func (a *InsightRepo) List(ctx context.Context) ([]assets.Insight, error) {
 		aud, ok := v.(assets.Insight)
 		if !ok {
 			errMsg := fmt.Sprintf("error while reading insight with id: %s from db", keys[i])
-			return []assets.Insight{}, NewInternalRepositoryError(errMsg)
+			return []assets.Insight{}, NewInternalRepositoryError(errMsg, nil)
 
 		}
 		res = append(res, aud)

@@ -17,7 +17,7 @@ func TestSaveUser(t *testing.T) {
 
 	defer down()
 
-	u := user.User{
+	u := user.AddUserCommand{
 		UserName: "test",
 		Email:    "test@host.com",
 		Password: "@!3aER&4!",
@@ -33,14 +33,14 @@ func TestSaveUserEmptyEmail(t *testing.T) {
 
 	defer down()
 
-	u := user.User{
+	u := user.AddUserCommand{
 		UserName: "test",
 		Password: "@!3aER&4!",
 	}
 
 	err := userRepo.Add(context.Background(), u)
 
-	expected := user.NewEmailMissingError()
+	var expected *user.ErrValidation
 	assert.ErrorAs(t, err, &expected)
 }
 
@@ -49,7 +49,7 @@ func TestGetUser(t *testing.T) {
 
 	defer down()
 
-	u := user.User{
+	u := user.AddUserCommand{
 		UserName: "test",
 		Email:    "test@host.com",
 		Password: "@!3aER&4!",
@@ -60,8 +60,12 @@ func TestGetUser(t *testing.T) {
 
 	usr, err := userRepo.GetByEmail(context.Background(), u.Email)
 
+	usrFromCmd := user.User{
+		UserName: u.UserName,
+		Email:    u.Email,
+	}
 	assert.NoError(t, err)
-	assert.Equal(t, u, usr)
+	assert.Equal(t, usrFromCmd, usr)
 }
 
 func SetUp() (*repo.UserDBRepo, func()) {

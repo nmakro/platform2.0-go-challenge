@@ -1,13 +1,14 @@
 package user
 
-type EmailMissing struct {
+type ErrValidation struct {
+	msg string
 }
 
 // Error function.
-func (r EmailMissing) Error() string {
-	return "user email cannot be empty"
+func (e *ErrValidation) Error() string {
+	return e.msg
 }
 
-func NewEmailMissingError() *EmailMissing {
-	return &EmailMissing{}
+func NewErrValidation(msg string) *ErrValidation {
+	return &ErrValidation{msg: msg}
 }

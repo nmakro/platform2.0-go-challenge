@@ -11,12 +11,15 @@ type User struct {
 	Email     string `json:"email"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Password  string `json:"-"`
 }
 
-type userValidator = func(u User) error
+type Credentials struct {
+	Password string `json:"-"`
+}
 
-func validateEmail(u User) error {
+type userValidator = func(u AddUserCommand) error
+
+func validateEmail(u AddUserCommand) error {
 	_, err := mail.ParseAddress(u.Email)
 	if err != nil {
 		return fmt.Errorf("user email %s is not valid", u.Email)
@@ -24,7 +27,7 @@ func validateEmail(u User) error {
 	return nil
 }
 
-func validateName(u User) error {
+func validateName(u AddUserCommand) error {
 	msg := "only letters are allowed in first and last name"
 	for _, v := range u.FirstName {
 		if !unicode.IsLetter(v) {
@@ -40,7 +43,8 @@ func validateName(u User) error {
 	return nil
 }
 
-func validatePassword(u User) error {
+func validatePassword(u AddUserCommand) error {
+	// Make some dummy password checks.
 	if len(u.Password) < 8 {
 		return fmt.Errorf("password must be at least eight characters long")
 	}
@@ -58,7 +62,7 @@ func validatePassword(u User) error {
 		return fmt.Errorf("password must have at least one digit")
 	}
 	if !hasUpper {
-		return fmt.Errorf("password must have at least one upper letter")
+		return fmt.Errorf("password must have at least one upper case letter")
 	}
 	return nil
 }
@@ -69,10 +73,10 @@ var userValidations = []userValidator{
 	validatePassword,
 }
 
-func ValidateUser(u User) error {
+func ValidateUser(u AddUserCommand) error {
 	for _, f := range userValidations {
 		if err := f(u); err != nil {
-			return err
+			return NewErrValidation(err.Error())
 		}
 	}
 	return nil

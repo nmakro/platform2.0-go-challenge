@@ -47,7 +47,7 @@ func (a *AudienceRepo) Get(ctx context.Context, audienceID uint32) (assets.Audie
 		return assets.Audience{}, app.NewEntityNotFoundError(errMsg)
 	case err != nil && !errors.As(err, &notFound):
 		errMsg := "unknown internal error"
-		return assets.Audience{}, NewInternalRepositoryError(errMsg)
+		return assets.Audience{}, NewInternalRepositoryError(errMsg, nil)
 	}
 
 	if aud, ok := v.(assets.Audience); ok {
@@ -55,7 +55,7 @@ func (a *AudienceRepo) Get(ctx context.Context, audienceID uint32) (assets.Audie
 	}
 
 	errMsg := fmt.Sprintf("error while reading audience with id: %d from db", audienceID)
-	return assets.Audience{}, NewInternalRepositoryError(errMsg)
+	return assets.Audience{}, NewInternalRepositoryError(errMsg, nil)
 }
 
 func (a *AudienceRepo) GetMany(ctx context.Context, audienceIDs []uint32) ([]assets.Audience, error) {
@@ -90,7 +90,7 @@ func (a *AudienceRepo) List(ctx context.Context) ([]assets.Audience, error) {
 		aud, ok := v.(assets.Audience)
 		if !ok {
 			errMsg := fmt.Sprintf("error while reading audience with id: %s from db", keys[i])
-			return []assets.Audience{}, NewInternalRepositoryError(errMsg)
+			return []assets.Audience{}, NewInternalRepositoryError(errMsg, nil)
 
 		}
 		res = append(res, aud)
@@ -129,7 +129,7 @@ func (a *AudienceRepo) Star(ctx context.Context, userEmail string, audienceID ui
 
 	if err != nil && !errors.As(err, &notFound) {
 		errMsg := fmt.Sprintf("error while reading starred audiences for user with email: %s:", userEmail)
-		return NewInternalRepositoryError(errMsg)
+		return NewInternalRepositoryError(errMsg, nil)
 	}
 
 	if starred, ok := v.([]uint32); ok {
@@ -162,7 +162,7 @@ func (a *AudienceRepo) Unstar(ctx context.Context, userEmail string, audienceID 
 		errMsg := fmt.Sprintf("cannot find starred audience assets for user: %s", userEmail)
 		return app.NewEntityNotFoundError(errMsg)
 	case err != nil && !errors.As(err, &notFound): // This Will never evaluate but hypothetically that could be an internal db error.
-		return NewInternalRepositoryError(UnknownError)
+		return NewInternalRepositoryError(UnknownError, err)
 	default:
 		if starred, ok := v.([]uint32); ok {
 			found := false

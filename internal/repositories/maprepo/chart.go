@@ -47,7 +47,7 @@ func (c *ChartRepo) Get(ctx context.Context, chartID uint32) (assets.Chart, erro
 		return assets.Chart{}, app.NewEntityNotFoundError(errMsg)
 	case err != nil && !errors.As(err, &notFound):
 		errMsg := "unknown internal error"
-		return assets.Chart{}, NewInternalRepositoryError(errMsg)
+		return assets.Chart{}, NewInternalRepositoryError(errMsg, nil)
 	}
 
 	if err != nil {
@@ -57,7 +57,7 @@ func (c *ChartRepo) Get(ctx context.Context, chartID uint32) (assets.Chart, erro
 		return chart, nil
 	}
 	errMsg := fmt.Sprintf("error while reading chart with id: %d from db", chartID)
-	return assets.Chart{}, NewInternalRepositoryError(errMsg)
+	return assets.Chart{}, NewInternalRepositoryError(errMsg, nil)
 }
 
 func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Chart, error) {
@@ -92,7 +92,7 @@ func (c *ChartRepo) List(ctx context.Context) ([]assets.Chart, error) {
 		aud, ok := v.(assets.Chart)
 		if !ok {
 			errMsg := fmt.Sprintf("error while reading chart with id: %s from db", keys[i])
-			return []assets.Chart{}, NewInternalRepositoryError(errMsg)
+			return []assets.Chart{}, NewInternalRepositoryError(errMsg, nil)
 
 		}
 		res = append(res, aud)
