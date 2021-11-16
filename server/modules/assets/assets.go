@@ -32,7 +32,7 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	audiences.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
 	audiences.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("DELETE")
 	audiences.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
-	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
+	audiences.HandleFunc("/audience/{id}", m.AddAudience).Methods("POST")
 
 	// Register charts routers.
 	charts := assets.PathPrefix("/charts").Subrouter()
@@ -40,23 +40,23 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	charts.HandleFunc("/chart/{id}", m.GetChart).Methods("GET")
 	charts.HandleFunc("/chart/{id}", m.DeleteChart).Methods("DELETE")
 	charts.HandleFunc("/chart/{id}", m.UpdateChart).Methods("PATCH")
-	charts.HandleFunc("/chart", m.AddChart).Methods("PUT")
+	charts.HandleFunc("/chart/{id}", m.AddChart).Methods("PUT")
 
 	insights := assets.PathPrefix("/insights").Subrouter()
 	insights.HandleFunc("/", m.ListInsights).Methods("GET")
 	insights.HandleFunc("/insight/{id}", m.GetInsight).Methods("GET")
 	insights.HandleFunc("/insight/{id}", m.DeleteInsight).Methods("DELETE")
 	insights.HandleFunc("/insight/{id}", m.UpdateInsight).Methods("PATCH")
-	insights.HandleFunc("/insight", m.AddInsight).Methods("PUT")
+	insights.HandleFunc("/insight/{id}", m.AddInsight).Methods("PUT")
 
 	stars := router.PathPrefix("starred-assets").Subrouter()
 	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")
-	stars.HandleFunc("/audience{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
 	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/insight{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
-	stars.HandleFunc("/chart{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/chart{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
