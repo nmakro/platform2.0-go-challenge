@@ -32,7 +32,7 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	audiences.HandleFunc("/audience/{id}", m.GetAudience).Methods("GET")
 	audiences.HandleFunc("/audience/{id}", m.DeleteAudience).Methods("DELETE")
 	audiences.HandleFunc("/audience/{id}", m.UpdateAudience).Methods("PATCH")
-	audiences.HandleFunc("/audience/{id}", m.AddAudience).Methods("POST")
+	audiences.HandleFunc("/audience", m.AddAudience).Methods("POST")
 
 	// Register charts routers.
 	charts := assets.PathPrefix("/charts").Subrouter()
@@ -40,14 +40,14 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	charts.HandleFunc("/chart/{id}", m.GetChart).Methods("GET")
 	charts.HandleFunc("/chart/{id}", m.DeleteChart).Methods("DELETE")
 	charts.HandleFunc("/chart/{id}", m.UpdateChart).Methods("PATCH")
-	charts.HandleFunc("/chart/{id}", m.AddChart).Methods("PUT")
+	charts.HandleFunc("/chart", m.AddChart).Methods("POST")
 
 	insights := assets.PathPrefix("/insights").Subrouter()
 	insights.HandleFunc("/", m.ListInsights).Methods("GET")
 	insights.HandleFunc("/insight/{id}", m.GetInsight).Methods("GET")
 	insights.HandleFunc("/insight/{id}", m.DeleteInsight).Methods("DELETE")
 	insights.HandleFunc("/insight/{id}", m.UpdateInsight).Methods("PATCH")
-	insights.HandleFunc("/insight/{id}", m.AddInsight).Methods("PUT")
+	insights.HandleFunc("/insight", m.AddInsight).Methods("POST")
 
 	stars := router.PathPrefix("starred-assets").Subrouter()
 	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")

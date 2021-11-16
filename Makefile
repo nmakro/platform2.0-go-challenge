@@ -5,10 +5,10 @@ export GO111MODULE
 CGO_ENABLED := 0
 export CGO_ENABLED
 
-BINARY_NAME=wgi-server
+BINARY_NAME=gwi-server
 
 app:
-	go build -o ${BINARY_NAME} ./cmd/wgiapp
+	go build -o ${BINARY_NAME} ./cmd/gwiapp
 
 run:
 	./${BINARY_NAME}
