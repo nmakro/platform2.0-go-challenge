@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app"
-	"github.com/nmakro/platform2.0-go-challenge/internal/app/session"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/user"
 	gwihttp "github.com/nmakro/platform2.0-go-challenge/pkg/http"
 	"github.com/nmakro/platform2.0-go-challenge/pkg/security"
@@ -18,13 +17,11 @@ var store = sessions.NewCookieStore([]byte("!@saz#asdasd@DaazSq@3"))
 
 type UsersModule struct {
 	service *user.UserService
-	session *session.SessioService
 }
 
-func Setup(router *mux.Router, service *user.UserService, session *session.SessioService) {
+func Setup(router *mux.Router, service *user.UserService) {
 	m := &UsersModule{
 		service: service,
-		session: session,
 	}
 
 	router.HandleFunc("/signup", m.SignUp).Methods("POST")

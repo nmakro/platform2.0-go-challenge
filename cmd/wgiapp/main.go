@@ -26,7 +26,7 @@ func main() {
 	router := mux.NewRouter()
 
 	assetModule.Setup(router, app.assetService)
-	userModule.Setup(router, app.userService, app.sessionService)
+	userModule.Setup(router, app.userService)
 
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
 	logger.Printf(Version)
