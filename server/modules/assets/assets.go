@@ -112,8 +112,8 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	close(errChan)
 	wg.Wait()
+	close(errChan)
 
 	for err := range errChan {
 		if err != nil {
@@ -195,8 +195,8 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 		}
 	}()
 
-	close(errChan)
 	wg.Wait()
+	close(errChan)
 
 	for err := range errChan {
 		if err != nil {
