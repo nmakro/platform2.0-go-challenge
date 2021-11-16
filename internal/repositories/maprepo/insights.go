@@ -63,6 +63,8 @@ func (a *InsightRepo) GetMany(ctx context.Context, insightIDs []uint32) ([]asset
 	for _, id := range insightIDs {
 		a, err := a.Get(ctx, id)
 		if err != nil {
+			fmt.Println("error in get many insights")
+			fmt.Println(err)
 			var notFound *app.ErrEntityNotFound
 			if errors.As(err, &notFound) {
 				continue
@@ -181,11 +183,14 @@ func (i *InsightRepo) GetStarredIDsForUser(ctx context.Context, userEmail string
 
 	v, err := i.starConn.Get(userEmail)
 	if err != nil {
-		return nil, err
+		errMsg := fmt.Sprintf("no starred insights found for user: %s", userEmail)
+		return []uint32{}, app.NewEntityNotFoundError(errMsg)
 	}
 
 	starred, ok := v.([]uint32)
 	if !ok {
+		fmt.Println("error in db read insights starred")
+		fmt.Println(err)
 		return []uint32{}, fmt.Errorf("error while reading starred insights for user: %s", userEmail)
 	}
 	return starred, nil

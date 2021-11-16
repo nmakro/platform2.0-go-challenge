@@ -1,6 +1,8 @@
 package assets
 
-import "context"
+import (
+	"context"
+)
 
 func (s AssetService) AddInsight(ctx context.Context, i Insight) error {
 	if err := ValidateInsight(i); err != nil {

@@ -8,13 +8,13 @@ export CGO_ENABLED
 BINARY_NAME=gwi-server
 
 app:
-	go build -o ${BINARY_NAME} ./cmd/gwiapp
+	@go build -o ${BINARY_NAME} ./cmd/gwiapp
 
 run:
-	./${BINARY_NAME}
+	@./${BINARY_NAME}
 
 serve:	app run
 
 clean:
-	go clean
+	@go clean
 	rm ${BINARY_NAME}

@@ -65,6 +65,8 @@ func (c *ChartRepo) GetMany(ctx context.Context, chartIDs []uint32) ([]assets.Ch
 	for _, id := range chartIDs {
 		chart, err := c.Get(ctx, id)
 		if err != nil {
+			fmt.Println("error in get many charts")
+			fmt.Println(err)
 			var notFound *app.ErrEntityNotFound
 			if errors.As(err, &notFound) {
 				continue
@@ -184,7 +186,8 @@ func (c *ChartRepo) GetStarredIDsForUser(ctx context.Context, userEmail string) 
 
 	v, err := c.starConn.Get(userEmail)
 	if err != nil {
-		return nil, err
+		errMsg := fmt.Sprintf("no starred charts found for user: %s", userEmail)
+		return nil, app.NewEntityNotFoundError(errMsg)
 	}
 
 	starred, ok := v.([]uint32)

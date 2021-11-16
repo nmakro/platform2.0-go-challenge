@@ -190,7 +190,8 @@ func (a *AudienceRepo) GetStarredIDsForUser(ctx context.Context, userEmail strin
 
 	v, err := a.starConn.Get(userEmail)
 	if err != nil {
-		return nil, err
+		errMsg := fmt.Sprintf("no starred audien found for user: %s", userEmail)
+		return nil, app.NewEntityNotFoundError(errMsg)
 	}
 
 	starred, ok := v.([]uint32)

@@ -2,6 +2,7 @@ package assets
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 
@@ -53,10 +54,10 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")
 	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
 	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
-	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
-	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarInsight)).Methods("PUT")
+	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarInsight)).Methods("DELETE")
+	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarChart)).Methods("PUT")
+	stars.HandleFunc("/chart/{id}", m.LoggedIn(m.StarChart)).Methods("DELETE")
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +90,6 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			errChan <- err
-			return
 		}
 
 		for i := range charts {
@@ -104,7 +104,6 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			errChan <- err
-			return
 		}
 
 		for i := range insights {
@@ -117,8 +116,11 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 
 	for err := range errChan {
 		if err != nil {
-			gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
-			return
+			var notFound *app.ErrEntityNotFound
+			if !errors.As(err, &notFound) {
+				gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
+				return
+			}
 		}
 	}
 
@@ -157,7 +159,6 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 
 		if err != nil {
 			errChan <- err
-			return
 		}
 
 		for i := range audiences {
@@ -169,14 +170,14 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 	go func() {
 		defer wg.Done()
 		charts, err := m.service.GetChartsForUser(r.Context(), userEmal)
+		fmt.Println(charts)
 
 		if err != nil {
 			errChan <- err
-			return
 		}
 
 		for i := range charts {
-			chartsSlice = append(charts, charts[i])
+			chartsSlice = append(chartsSlice, charts[i])
 		}
 	}()
 
@@ -201,17 +202,15 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 	for err := range errChan {
 		if err != nil {
 			var notFound *app.ErrEntityNotFound
-			if errors.As(err, &notFound) {
-				gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": "cannot find logged in user"}, w)
+			if !errors.As(err, &notFound) {
+				gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 				return
 			}
-			gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
-			return
 		}
 	}
 
 	result := struct {
-		Audiences []assets.Audience `json:"audience"`
+		Audiences []assets.Audience `json:"audiences"`
 		Charts    []assets.Chart    `json:"charts"`
 		Insights  []assets.Insight  `json:"insights"`
 	}{
