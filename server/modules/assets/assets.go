@@ -51,12 +51,12 @@ func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessi
 
 	stars := router.PathPrefix("starred-assets").Subrouter()
 	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")
-	stars.HandleFunc("/audiences", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/audiences", m.LoggedIn(m.StarAudience)).Methods("DELETE")
-	stars.HandleFunc("/insights", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/insights", m.LoggedIn(m.StarAudience)).Methods("DELETE")
-	stars.HandleFunc("/charts", m.LoggedIn(m.StarAudience)).Methods("PUT")
-	stars.HandleFunc("/charts", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/audience{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/audience/{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/insight/{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/insight{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/chart{id}", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/charts{id}", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
