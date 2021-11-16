@@ -1,0 +1,79 @@
+{
+    "search.exclude": {
+      "**/vendor": true,
+    },
+    // https://github.com/golang/vscode-go/blob/master/docs/settings.md
+    "go.autocompleteUnimportedPackages": true,
+    "go.disableConcurrentTests": true,
+    "go.useCodeSnippetsOnFunctionSuggest": true,
+    "go.editorContextMenuCommands": {
+      "toggleTestFile": true,
+      "addTags": true,
+      "removeTags": false,
+      "fillStruct": true,
+      "testAtCursor": true,
+      "testFile": false,
+      "testPackage": false,
+      "generateTestForFunction": true,
+      "generateTestForFile": true,
+      "generateTestForPackage": false,
+      "addImport": true,
+      "testCoverage": true,
+      "playground": true,
+      "debugTestAtCursor": true,
+      "benchmarkAtCursor": false
+    },
+    "go.enableCodeLens": {
+      "references": false,
+      "runtest": true
+    },
+    "go.useLanguageServer": true,
+    "go.formatTool": "default",
+    // "go.lintTool": "staticcheck",
+    // "go.lintFlags": [
+    //   "-checks=all,-ST1000",
+    //   "-tests",
+    //   "-tags=api_test,integration_test"
+    // ],
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [],
+    "go.toolsEnvVars": {
+      "GOFLAGS": "-mod=vendor -tags=api_test,integration_test,special_tests"
+    },
+    "go.testFlags": [
+      "-tags=api_test,integration_test",
+      "-mod=vendor",
+      "-v",
+      "-count=1"
+    ],
+    "go.liveErrors": {
+      "enabled": true,
+      "delay": 500
+    },
+    "go.testTimeout":"50s",
+    "go.gotoSymbol.includeImports": true,
+    "gopls": {
+      "build.allowImplicitNetworkAccess": true,
+      "build.experimentalWorkspaceModule": false,
+      "build.buildFlags": [
+        "-mod=vendor",
+        "-tags=api_test,integration_test,special_tests"
+      ],
+      "build.env": {
+        "GO111MODULE": "on",
+        "GOFLAGS": "-mod=vendor -tags=api_test,integration_test,special_tests"
+      },
+      "codelenses": {
+        "gc_details": true,
+        "generate": false,
+        "regenerate_cgo": true,
+        "tidy": true,
+        "upgrade_dependency": true,
+        "vendor": true
+      },
+      "ui.completion.usePlaceholders": true,
+      "ui.completion.matcher": "Fuzzy",
+      "ui.completion.completionBudget": "100ms",
+      "ui.completion.experimentalPostfixCompletions": true
+    }
+  }

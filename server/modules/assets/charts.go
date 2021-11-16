@@ -152,19 +152,28 @@ func (m *AssetsModule) ListCharts(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, response, w)
 }
 
-type StarChartRequest struct {
-	UserEmail string `json:"user_email"`
-	ChartID   uint32 `json:"chart_id"`
-}
-
 func (m *AssetsModule) StarChart(w http.ResponseWriter, r *http.Request) {
-	req := StarChartRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.StarChart(r.Context(), req.UserEmail, req.ChartID); err != nil {
+	vars := mux.Vars(r)
+	chartID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(chartID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		return
+	}
+
+	if err := m.service.StarChart(r.Context(), userEmail, uint32(id)); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
@@ -172,19 +181,28 @@ func (m *AssetsModule) StarChart(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type UnStarChartRequest struct {
-	UserEmail string `json:"user_email"`
-	ChartID   uint32 `json:"chart_id"`
-}
-
 func (m *AssetsModule) UnStarChart(w http.ResponseWriter, r *http.Request) {
-	req := UnStarChartRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.UnstarChart(r.Context(), req.UserEmail, req.ChartID); err != nil {
+	vars := mux.Vars(r)
+	chartID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(chartID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		return
+	}
+
+	if err := m.service.UnstarChart(r.Context(), userEmail, uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)

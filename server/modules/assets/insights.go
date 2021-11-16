@@ -152,19 +152,28 @@ func (m *AssetsModule) ListInsights(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, response, w)
 }
 
-type StarInsightRequest struct {
-	UserEmail string `json:"user_email"`
-	InsightID uint32 `json:"insight_id"`
-}
-
 func (m *AssetsModule) StarInsight(w http.ResponseWriter, r *http.Request) {
-	req := StarInsightRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.StartInsight(r.Context(), req.UserEmail, req.InsightID); err != nil {
+	vars := mux.Vars(r)
+	insightID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an insight id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(insightID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "insight id must be a uint"}, w)
+		return
+	}
+
+	if err := m.service.StartInsight(r.Context(), userEmail, uint32(id)); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
@@ -172,19 +181,27 @@ func (m *AssetsModule) StarInsight(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type UnStarInsightRequest struct {
-	UserEmail string `json:"user_email"`
-	InsightID uint32 `json:"insight_id"`
-}
-
 func (m *AssetsModule) UnStarInsight(w http.ResponseWriter, r *http.Request) {
-	req := UnStarInsightRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.UnstarInsight(r.Context(), req.UserEmail, req.InsightID); err != nil {
+	vars := mux.Vars(r)
+	insightID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an insight id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(insightID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "insight id must be a uint"}, w)
+		return
+	}
+	if err := m.service.UnstarInsight(r.Context(), userEmail, uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)

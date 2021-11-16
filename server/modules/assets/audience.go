@@ -2,7 +2,6 @@ package assets
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -136,7 +135,6 @@ func (m *AssetsModule) GetAudience(w http.ResponseWriter, r *http.Request) {
 	if response, err = m.service.GetAudience(r.Context(), uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, &notFound) {
-			fmt.Println("not found!!!!")
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)
 			return
 		}
@@ -162,19 +160,28 @@ func (m *AssetsModule) ListAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, response, w)
 }
 
-type StarAudienceRequest struct {
-	UserEmail  string `json:"user_email"`
-	AudienceID uint32 `json:"audience_id"`
-}
-
 func (m *AssetsModule) StarAudience(w http.ResponseWriter, r *http.Request) {
-	req := StarAudienceRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.StarAudience(r.Context(), req.UserEmail, req.AudienceID); err != nil {
+	vars := mux.Vars(r)
+	audienceID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(audienceID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		return
+	}
+
+	if err := m.service.StarAudience(r.Context(), userEmail, uint32(id)); err != nil {
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
 		return
 	}
@@ -182,19 +189,28 @@ func (m *AssetsModule) StarAudience(w http.ResponseWriter, r *http.Request) {
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
 
-type UnStarAudienceRequest struct {
-	UserEmail  string `json:"user_email"`
-	AudienceID uint32 `json:"audience_id"`
-}
-
 func (m *AssetsModule) UnStarAudience(w http.ResponseWriter, r *http.Request) {
-	req := UnStarAudienceRequest{}
-	if err := gwihttp.ValidateRequest(r, &req); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmail, ok := session.Values["user_email"].(string)
+	if !ok || userEmail == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	if err := m.service.UnstarAudience(r.Context(), req.UserEmail, req.AudienceID); err != nil {
+	vars := mux.Vars(r)
+	audienceID, ok := vars["id"]
+	if !ok {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "you must specify an audience id"}, w)
+		return
+	}
+
+	id, err := strconv.Atoi(audienceID)
+	if err != nil {
+		gwihttp.ResponseWithJSON(http.StatusBadRequest, map[string]interface{}{"error": "audience id must be a uint"}, w)
+		return
+	}
+
+	if err := m.service.UnstarAudience(r.Context(), userEmail, uint32(id)); err != nil {
 		var notFound *app.ErrEntityNotFound
 		if errors.As(err, notFound) {
 			gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": err.Error()}, w)

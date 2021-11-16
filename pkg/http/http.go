@@ -12,7 +12,6 @@ func ValidateRequest(r *http.Request, i interface{}) error {
 		return err
 	}
 
-	// Transform into RequestBody struct
 	err = json.Unmarshal(rawRequestBody, i)
 	if err != nil {
 		return err

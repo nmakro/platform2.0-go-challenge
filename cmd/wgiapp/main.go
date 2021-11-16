@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nmakro/platform2.0-go-challenge/environment"
+	"github.com/nmakro/platform2.0-go-challenge/internal/session"
 	"github.com/nmakro/platform2.0-go-challenge/server"
 	assetModule "github.com/nmakro/platform2.0-go-challenge/server/modules/assets"
 	userModule "github.com/nmakro/platform2.0-go-challenge/server/modules/user"
@@ -25,8 +26,9 @@ func main() {
 	app := NewApp()
 	router := mux.NewRouter()
 
-	assetModule.Setup(router, app.assetService)
-	userModule.Setup(router, app.userService)
+	sessionStore := session.GetSessionStore()
+	assetModule.Setup(router, app.assetService, sessionStore)
+	userModule.Setup(router, app.userService, sessionStore)
 
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
 	logger.Printf(Version)

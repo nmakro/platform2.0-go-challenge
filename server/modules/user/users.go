@@ -13,15 +13,15 @@ import (
 	"github.com/nmakro/platform2.0-go-challenge/pkg/security"
 )
 
-var store = sessions.NewCookieStore([]byte("!@saz#asdasd@DaazSq@3"))
-
 type UsersModule struct {
-	service *user.UserService
+	service      *user.UserService
+	sessionStore sessions.CookieStore
 }
 
-func Setup(router *mux.Router, service *user.UserService) {
+func Setup(router *mux.Router, service *user.UserService, sessionStore *sessions.CookieStore) {
 	m := &UsersModule{
-		service: service,
+		service:      service,
+		sessionStore: *sessionStore,
 	}
 
 	router.HandleFunc("/signup", m.SignUp).Methods("POST")
@@ -56,16 +56,15 @@ func (m *UsersModule) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := store.Get(r, "gwi-cookie")
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
 	session.Values["authenticated"] = true
 	session.Values["user_email"] = req.Email
 
 	if err := session.Save(r, w); err != nil {
-		errSession := fmt.Errorf("error in user sign: %w", err)
+		errSession := fmt.Errorf("error in user sign in: %w", err)
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": errSession.Error()}, w)
 		return
 	}
-	fmt.Println(session.Values)
 
 	gwihttp.ResponseWithJSON(http.StatusOK, nil, w)
 }
@@ -94,11 +93,11 @@ func (m *UsersModule) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := store.Get(r, "gwi-cookie")
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
 	session.Values["authenticated"] = true
 	session.Values["user_email"] = user.Email
 	if err = session.Save(r, w); err != nil {
-		errSession := fmt.Errorf("error in user sign: %w", err)
+		errSession := fmt.Errorf("error in user sign in: %w", err)
 		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": errSession.Error()}, w)
 		return
 	}
@@ -130,7 +129,7 @@ func (m *UsersModule) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *UsersModule) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "gwi-cookie")
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
 
 	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)

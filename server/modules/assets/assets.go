@@ -1,20 +1,26 @@
 package assets
 
 import (
+	"errors"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	"github.com/nmakro/platform2.0-go-challenge/internal/app"
 	"github.com/nmakro/platform2.0-go-challenge/internal/app/assets"
 	gwihttp "github.com/nmakro/platform2.0-go-challenge/pkg/http"
 )
 
 type AssetsModule struct {
-	service *assets.AssetService
+	service      *assets.AssetService
+	sessionStore *sessions.CookieStore
 }
 
-func Setup(router *mux.Router, service *assets.AssetService) {
+func Setup(router *mux.Router, service *assets.AssetService, sessionStore *sessions.CookieStore) {
 	m := &AssetsModule{
-		service: service,
+		service:      service,
+		sessionStore: sessionStore,
 	}
 
 	assets := router.PathPrefix("/assets").Subrouter()
@@ -43,15 +49,188 @@ func Setup(router *mux.Router, service *assets.AssetService) {
 	insights.HandleFunc("/insight/{id}", m.UpdateInsight).Methods("PATCH")
 	insights.HandleFunc("/insight", m.AddInsight).Methods("PUT")
 
+	stars := router.PathPrefix("starred-assets").Subrouter()
+	stars.HandleFunc("/", m.ListFavoritesAssetsForUser).Methods("GET")
+	stars.HandleFunc("/audiences", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/audiences", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/insights", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/insights", m.LoggedIn(m.StarAudience)).Methods("DELETE")
+	stars.HandleFunc("/charts", m.LoggedIn(m.StarAudience)).Methods("PUT")
+	stars.HandleFunc("/charts", m.LoggedIn(m.StarAudience)).Methods("DELETE")
 }
 
 func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
-	audiences, err := m.service.ListAudienceAssets(r.Context())
+	var (
+		wg sync.WaitGroup
+	)
+	wg.Add(3)
 
-	if err != nil {
-		gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
+	errChan := make(chan error, 3)
+
+	audiences := make([]assets.Audience, 0, 50)
+	go func() {
+		defer wg.Done()
+		aud, err := m.service.ListAudienceAssets(r.Context())
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range audiences {
+			audiences = append(audiences, aud[i])
+		}
+	}()
+
+	chartsSlice := make([]assets.Chart, 0, 50)
+	go func() {
+		defer wg.Done()
+		charts, err := m.service.ListChartAssets(r.Context())
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range charts {
+			chartsSlice = append(charts, charts[i])
+		}
+	}()
+
+	insights := make([]assets.Insight, 0, 50)
+	go func() {
+		defer wg.Done()
+		ins, err := m.service.ListInsightAssets(r.Context())
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range insights {
+			insights = append(insights, ins[i])
+		}
+	}()
+
+	close(errChan)
+	wg.Wait()
+
+	for err := range errChan {
+		if err != nil {
+			gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
+			return
+		}
+	}
+
+	result := struct {
+		Audiences []assets.Audience `json:"audience"`
+		Charts    []assets.Chart    `json:"charts"`
+		Insights  []assets.Insight  `json:"insights"`
+	}{
+		Audiences: audiences,
+		Charts:    chartsSlice,
+		Insights:  insights,
+	}
+
+	gwihttp.ResponseWithJSON(http.StatusOK, result, w)
+}
+
+func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http.Request) {
+	session, _ := m.sessionStore.Get(r, "gwi-cookie")
+	userEmal, ok := session.Values["user_email"].(string)
+	if !ok || userEmal == "" {
+		gwihttp.ResponseWithJSON(http.StatusUnauthorized, nil, w)
 		return
 	}
 
-	gwihttp.ResponseWithJSON(http.StatusOK, audiences, w)
+	var (
+		wg sync.WaitGroup
+	)
+	wg.Add(3)
+
+	errChan := make(chan error, 3)
+
+	audiences := make([]assets.Audience, 0, 50)
+	go func() {
+		defer wg.Done()
+		aud, err := m.service.GetAudiencesForUser(r.Context(), userEmal)
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range audiences {
+			audiences = append(audiences, aud[i])
+		}
+	}()
+
+	chartsSlice := make([]assets.Chart, 0, 50)
+	go func() {
+		defer wg.Done()
+		charts, err := m.service.GetChartsForUser(r.Context(), userEmal)
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range charts {
+			chartsSlice = append(charts, charts[i])
+		}
+	}()
+
+	insights := make([]assets.Insight, 0, 50)
+	go func() {
+		defer wg.Done()
+		ins, err := m.service.GetInsightsForUser(r.Context(), userEmal)
+
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		for i := range insights {
+			insights = append(insights, ins[i])
+		}
+	}()
+
+	close(errChan)
+	wg.Wait()
+
+	for err := range errChan {
+		if err != nil {
+			var notFound *app.ErrEntityNotFound
+			if errors.As(err, &notFound) {
+				gwihttp.ResponseWithJSON(http.StatusNotFound, map[string]interface{}{"error": "cannot find logged in user"}, w)
+				return
+			}
+			gwihttp.ResponseWithJSON(http.StatusInternalServerError, map[string]interface{}{"error": err.Error()}, w)
+			return
+		}
+	}
+
+	result := struct {
+		Audiences []assets.Audience `json:"audience"`
+		Charts    []assets.Chart    `json:"charts"`
+		Insights  []assets.Insight  `json:"insights"`
+	}{
+		Audiences: audiences,
+		Charts:    chartsSlice,
+		Insights:  insights,
+	}
+
+	gwihttp.ResponseWithJSON(http.StatusOK, result, w)
+}
+
+func (m *AssetsModule) LoggedIn(nextHandler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		store := m.sessionStore
+		session, _ := store.Get(r, "gwi-cookie")
+		if auth, ok := session.Values["authenticated"].(bool); ok && auth {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		nextHandler(w, r)
+	}
 }
