@@ -228,9 +228,8 @@ func (m *AssetsModule) LoggedIn(nextHandler http.HandlerFunc) http.HandlerFunc {
 		store := m.sessionStore
 		session, _ := store.Get(r, "gwi-cookie")
 		if auth, ok := session.Values["authenticated"].(bool); ok && auth {
-			w.WriteHeader(http.StatusOK)
-			return
+			nextHandler(w, r)
 		}
-		nextHandler(w, r)
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
