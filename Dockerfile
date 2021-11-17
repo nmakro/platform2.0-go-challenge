@@ -18,6 +18,6 @@ FROM scratch
 
 COPY --from=builder /app/gwi-server /
 
-EXPOSE 31000
+EXPOSE 8081
 
 ENTRYPOINT ["/gwi-server"]

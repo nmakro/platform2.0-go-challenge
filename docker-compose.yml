@@ -3,4 +3,4 @@ services:
   web:
     build: .
     ports:
-      - "3100:3100"
+      - "8081:8081"

@@ -5,7 +5,7 @@ import (
 )
 
 func setDefaults() {
-	viper.SetDefault("SERVER_ADDRESS", ":31000")
+	viper.SetDefault("SERVER_ADDRESS", ":8081")
 	viper.SetDefault("SESSION_AUTH_KEY", "!@s+za%@DaazSq@3")
 }
 

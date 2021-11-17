@@ -78,7 +78,7 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		for i := range audiences {
+		for i := range aud {
 			audiences = append(audiences, aud[i])
 		}
 	}()
@@ -106,7 +106,7 @@ func (m *AssetsModule) ListAssets(w http.ResponseWriter, r *http.Request) {
 			errChan <- err
 		}
 
-		for i := range insights {
+		for i := range ins {
 			insights = append(insights, ins[i])
 		}
 	}()
@@ -161,7 +161,7 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 			errChan <- err
 		}
 
-		for i := range audiences {
+		for i := range aud {
 			audiences = append(audiences, aud[i])
 		}
 	}()
@@ -191,7 +191,7 @@ func (m *AssetsModule) ListFavoritesAssetsForUser(w http.ResponseWriter, r *http
 			return
 		}
 
-		for i := range insights {
+		for i := range ins {
 			insights = append(insights, ins[i])
 		}
 	}()

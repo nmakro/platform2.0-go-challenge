@@ -18,6 +18,15 @@ run:
 
 serve:	app run
 
+docker-build:
+	@docker build --no-cache -t gwi:latest .
+
+docker-run:
+	@docker-compose up --force-recreate
+
+docker-down:
+	@docker-compose down --remove-orphans
+
 clean:
 	@go clean
 	@rm ${BINARY_NAME}
