@@ -12,11 +12,11 @@
  - A `GET` on a prefix either `assets` or an asset type e.x `/assets/charts/` lists all relevant data.
  - Use `POST` to create an asset entity, `PATCH` to update.
  - For example update insight with id 20 `PATCH`: endpoint `/assets/insights/insight{20}`.
- - A user can star a specific asset by using prefix `/starred-assets` followed by the asset type and the asset id, e.x. `/starred-assets//audience/{1}`.
+ - A user can star a specific asset by using prefix `/starred-assets` followed by the asset type and the asset id, e.x. `/starred-assets/audience/{1}`.
  - Use `PUT` to star an asset and `DELETE` to unstar.
  - Use a `GET` request to list all user's favorites assets in `/starred-assets/`
  - All star related actions can be issued only be logged-in users.
- - User login and signup are supported in `/login` and `/login` respectively.
+ - User login and signup are supported in `/login` and `/signup` respectively.
  - User related paths are under the prefix `/users/`. 
  - Create, Update, Get and Delete users in the following path `/users/user/{1}`.
 
