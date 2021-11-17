@@ -10,6 +10,9 @@ BINARY_NAME=gwi-server
 app:
 	@go build -o ${BINARY_NAME} ./cmd/gwiapp
 
+tests:
+	@go test --tags=integration_test github.com/nmakro/platform2.0-go-challenge/internal/repositories/maprepo -coverprofile=coverage.out
+
 run:
 	@./${BINARY_NAME}
 
@@ -17,4 +20,4 @@ serve:	app run
 
 clean:
 	@go clean
-	rm ${BINARY_NAME}
+	@rm ${BINARY_NAME}
